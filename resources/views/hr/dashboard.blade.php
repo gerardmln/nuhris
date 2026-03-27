@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>HR Dashboard | {{ config('app.name', 'NU HRIS') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="min-h-screen bg-[#eceef1] text-slate-900 antialiased overflow-x-hidden overflow-y-auto">
+    <div class="flex min-h-screen flex-col lg:flex-row">
+        <aside class="w-full bg-[#00386f] text-white lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:shrink-0">
+            <div class="border-b border-white/20 px-6 py-5">
+                <p class="text-2xl font-extrabold tracking-wide">NU HRIS</p>
+                <p class="text-sm text-blue-100">Human Resources</p>
+            </div>
+
+            <nav class="px-4 py-4">
+                <ul class="space-y-2 text-[15px]">
+                    <li>
+                        <a href="{{ route('dashboard') }}" class="flex items-center gap-2 rounded-xl bg-[#ffdc00] px-4 py-2 font-semibold text-slate-900 shadow-sm">
+                            <span class="h-2 w-2 rounded-full bg-slate-900"></span>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li><a href="{{ route('employees.index') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Employees</a></li>
+                    <li><a href="{{ route('credentials.index') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Credentials</a></li>
+                    <li><a href="{{ route('timekeeping.index') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Time Keeping</a></li>
+                    <li><a href="{{ route('leave.index') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Leave Management</a></li>
+                    <li><a href="{{ route('announcements.index') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Announcements</a></li>
+                </ul>
+            </nav>
+
+            <div class="mt-8 border-t border-white/20 px-5 py-5 lg:mt-auto">
+                <div class="mb-4">
+                    <p class="text-sm font-semibold">{{ auth()->user()->name ?? 'Martinez, Ian Isaac' }}</p>
+                    <p class="text-xs text-blue-100">{{ auth()->user()->email ?? 'user' }}</p>
+                </div>
+
+                @auth
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full rounded-lg border border-white/20 px-4 py-2 text-left text-sm font-medium hover:bg-white/10">
+                            Sign out
+                        </button>
+                    </form>
+                @endauth
+            </div>
+        </aside>
+
+        <main class="min-h-screen flex-1">
+            <header class="border-b border-slate-300 bg-white px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-[30px] font-bold leading-none text-[#1f2b5d]">Dashboard</h1>
+                        <p class="text-sm text-slate-500">National University HRIS</p>
+                    </div>
+
+                    @include('partials.header-actions')
+                </div>
+            </header>
+
+            <section class="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-[#1f2b5d]">HR Dashboard</h2>
+                    <p class="text-sm text-slate-500">Welcome back! Here is your HR overview.</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
+                        <p class="text-xs font-medium text-slate-500">Total Employees</p>
+                        <p class="mt-1 text-4xl font-extrabold">5</p>
+                    </article>
+                    <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
+                        <p class="text-xs font-medium text-slate-500">Pending Credentials</p>
+                        <p class="mt-1 text-4xl font-extrabold">4</p>
+                    </article>
+                    <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
+                        <p class="text-xs font-medium text-slate-500">Present Today</p>
+                        <p class="mt-1 text-4xl font-extrabold">5</p>
+                    </article>
+                    <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
+                        <p class="text-xs font-medium text-slate-500">Expiring Licenses</p>
+                        <p class="mt-1 text-4xl font-extrabold">0</p>
+                    </article>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+                    <div class="space-y-4 xl:col-span-2">
+                        <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
+                            <h3 class="mb-3 text-2xl font-bold text-slate-800">Action Required</h3>
+
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3">
+                                    <div>
+                                        <p class="font-semibold text-slate-800">4 Resume(s) Need Update</p>
+                                        <p class="text-xs text-slate-500">Outdated records</p>
+                                    </div>
+                                    <span class="text-slate-400">></span>
+                                </div>
+
+                                <div class="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                                    <div>
+                                        <p class="font-semibold text-slate-800">1 Credential pending review</p>
+                                        <p class="text-xs text-slate-500">Requires verification</p>
+                                    </div>
+                                    <span class="text-slate-400">></span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
+                            <h3 class="mb-2 text-2xl font-bold text-slate-800">Records Overview</h3>
+                            <p class="mb-3 text-sm text-slate-500">Latest HR updates and metrics.</p>
+
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <p class="text-sm font-semibold text-slate-700">Onboarding Queue</p>
+                                    <p class="mt-2 text-3xl font-extrabold">3</p>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <p class="text-sm font-semibold text-slate-700">Payroll Pending</p>
+                                    <p class="mt-2 text-3xl font-extrabold">2</p>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <p class="text-sm font-semibold text-slate-700">Leaves for Approval</p>
+                                    <p class="mt-2 text-3xl font-extrabold">6</p>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <p class="text-sm font-semibold text-slate-700">Policy Drafts</p>
+                                    <p class="mt-2 text-3xl font-extrabold">1</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="space-y-4">
+                        <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
+                            <h3 class="text-2xl font-bold text-slate-800">Calendar</h3>
+                            <p class="mb-3 text-sm text-slate-500">February 2026</p>
+
+                            <div class="grid grid-cols-7 gap-1 text-center text-xs text-slate-500">
+                                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                            </div>
+
+                            <div class="mt-2 grid grid-cols-7 gap-1 text-center text-sm">
+                                <span class="rounded py-1">1</span><span class="rounded py-1">2</span><span class="rounded py-1">3</span><span class="rounded py-1">4</span><span class="rounded py-1">5</span><span class="rounded py-1">6</span><span class="rounded py-1">7</span>
+                                <span class="rounded py-1">8</span><span class="rounded py-1">9</span><span class="rounded py-1">10</span><span class="rounded py-1">11</span><span class="rounded py-1">12</span><span class="rounded bg-sky-600 py-1 font-semibold text-white">13</span><span class="rounded py-1">14</span>
+                                <span class="rounded py-1">15</span><span class="rounded py-1">16</span><span class="rounded py-1">17</span><span class="rounded py-1">18</span><span class="rounded py-1">19</span><span class="rounded py-1">20</span><span class="rounded py-1">21</span>
+                                <span class="rounded py-1">22</span><span class="rounded py-1">23</span><span class="rounded py-1">24</span><span class="rounded py-1">25</span><span class="rounded py-1">26</span><span class="rounded py-1">27</span><span class="rounded py-1">28</span>
+                            </div>
+
+                            <div class="mt-4 space-y-2">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Upcoming Events</p>
+                                <div class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm">National Heroes Day</div>
+                                <div class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm">PRC License Renewal Period</div>
+                            </div>
+                        </article>
+
+                        <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
+                            <div class="mb-2 flex items-center justify-between">
+                                <h3 class="text-2xl font-bold text-slate-800">Announcements</h3>
+                                <a href="{{ route('announcements.index') }}" class="text-sm font-semibold text-blue-700 hover:underline">View all</a>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="rounded-lg border border-slate-200 px-3 py-2">
+                                    <p class="text-sm font-semibold">CHED Compliance Deadline Reminder</p>
+                                    <p class="text-xs text-slate-500">Jun 10, 2025</p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 px-3 py-2">
+                                    <p class="text-sm font-semibold">Faculty Development Program Registration</p>
+                                    <p class="text-xs text-slate-500">Jun 8, 2025</p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 px-3 py-2">
+                                    <p class="text-sm font-semibold">Updated Leave Policy</p>
+                                    <p class="text-xs text-slate-500">Jun 5, 2025</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <article class="rounded-2xl bg-[#00386f] px-5 py-4 text-white shadow-md">
+                    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <h3 class="text-2xl font-bold">Quick Actions</h3>
+                            <p class="text-sm text-blue-100">Commonly used HR functions</p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            <button data-open-modal="quick-add-employee-modal" class="rounded-lg bg-[#ffdc00] px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-yellow-300">Add Employee</button>
+                            <button data-open-modal="quick-upload-credentials-modal" class="rounded-lg bg-[#ffdc00] px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-yellow-300">Upload Credentials</button>
+                            <button data-open-modal="quick-post-announcement-modal" class="rounded-lg bg-[#ffdc00] px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-yellow-300">Post Announcement</button>
+                        </div>
+                    </div>
+                </article>
+
+                <div class="h-8"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="quick-add-employee-modal" class="fixed inset-0 z-50 hidden items-start justify-center overflow-y-auto bg-black/45 p-4 py-6 sm:items-center">
+        <div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-start justify-between px-8 py-6">
+                <h3 class="text-4xl font-bold text-[#1f2b8b]">Add Employee</h3>
+                <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
+            </div>
+
+            <div class="px-8 pb-8">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">First Name</label>
+                        <input type="text" placeholder="Juan" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Last Name</label>
+                        <input type="text" placeholder="Dela Cruz" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Email</label>
+                        <input type="email" placeholder="name@nu.edu.ph" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Phone Number</label>
+                        <input type="text" placeholder="09xxxxxxxxx" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Department</label>
+                        <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                            <option>College of Engineering</option>
+                            <option>College of Business</option>
+                            <option>College of Education</option>
+                            <option>College of Arts &amp; Sciences</option>
+                            <option>College of Computing</option>
+                            <option>College of Allied Health</option>
+                            <option>Administration</option>
+                            <option>Human Resources</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Position</label>
+                        <input type="text" placeholder="Faculty" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Date Hired</label>
+                        <input type="date" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Status</label>
+                        <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                            <option>Active</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                    <button type="button" data-close-modal class="rounded-md border border-slate-400 px-6 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="button" data-close-modal class="rounded-md bg-[#00386f] px-6 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">Save Employee</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quick-upload-credentials-modal" class="fixed inset-0 z-50 hidden items-start justify-center overflow-y-auto bg-black/45 p-4 py-6 sm:items-center">
+        <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-start justify-between px-8 py-6">
+                <h3 class="text-4xl font-bold text-[#1f2b8b]">Upload Credentials PDF</h3>
+                <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
+            </div>
+
+            <div class="px-8 pb-8">
+                <label class="mb-2 block text-sm font-semibold text-slate-700">Credential File (PDF)</label>
+
+                <div class="rounded-lg border border-dashed border-slate-400 p-8 text-center">
+                    <div class="mx-auto inline-flex h-14 w-14 items-center justify-center text-slate-400">
+                        <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 16V4" />
+                            <path d="m7 9 5-5 5 5" />
+                            <path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+                        </svg>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-500">Click to upload or drag and drop</p>
+                    <p class="text-xs text-slate-400">PDF, CSV, or XLSX</p>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                    <button type="button" data-close-modal class="rounded-md border border-slate-400 px-6 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="button" data-close-modal class="inline-flex items-center justify-center gap-2 rounded-md bg-[#00386f] px-6 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="m9 12 2 2 4-4"></path>
+                        </svg>
+                        Process File
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quick-post-announcement-modal" class="fixed inset-0 z-50 hidden items-start justify-center overflow-y-auto bg-black/45 p-4 py-6 sm:items-center">
+        <div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-start justify-between px-8 py-6">
+                <div>
+                    <h3 class="text-4xl font-bold text-[#1f2b8b]">New Announcement</h3>
+                    <p class="text-sm text-slate-500">Create a new announcement for employees</p>
+                </div>
+                <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
+            </div>
+
+            <div class="px-8 pb-8">
+                <div class="space-y-4">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Title *</label>
+                        <input type="text" placeholder="Announcement title" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Content *</label>
+                        <textarea rows="4" placeholder="Write your announcement here..." class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                            <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Priority</label>
+                            <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                                <option>Medium</option>
+                                <option>Low</option>
+                                <option>High</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Target Audience</label>
+                            <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                                <option>Specific Department</option>
+                                <option>Faculty Only</option>
+                                <option>Everyone</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Target Department</label>
+                        <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                            <option>Select Department</option>
+                            <option>College of Engineering</option>
+                            <option>College of Business</option>
+                            <option>College of Education</option>
+                            <option>College of Arts &amp; Sciences</option>
+                            <option>College of Computing</option>
+                            <option>College of Allied Health</option>
+                            <option>Administration</option>
+                            <option>Human Resources</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                    <button type="button" data-close-modal class="rounded-md border border-slate-400 px-6 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="button" data-close-modal class="rounded-md bg-[#00386f] px-6 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">Post announcement</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modalOpenButtons = document.querySelectorAll('[data-open-modal]');
+        const modalCloseButtons = document.querySelectorAll('[data-close-modal]');
+        const allQuickModals = document.querySelectorAll('#quick-add-employee-modal, #quick-upload-credentials-modal, #quick-post-announcement-modal');
+
+        function openQuickModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeQuickModal(modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            const hasOpen = Array.from(allQuickModals).some((item) => !item.classList.contains('hidden'));
+            if (!hasOpen) {
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+
+        modalOpenButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                openQuickModal(button.dataset.openModal);
+            });
+        });
+
+        modalCloseButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const modal = button.closest('.fixed.inset-0');
+                if (modal) closeQuickModal(modal);
+            });
+        });
+
+        allQuickModals.forEach((modal) => {
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeQuickModal(modal);
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            allQuickModals.forEach((modal) => {
+                if (!modal.classList.contains('hidden')) {
+                    closeQuickModal(modal);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
