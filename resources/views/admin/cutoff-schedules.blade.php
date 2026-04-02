@@ -33,8 +33,16 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200">
-                        <tr><td class="px-2 py-2">February 2026 - 1st Half</td><td class="px-2 py-2">Feb 1, 2026</td><td class="px-2 py-2">Feb 15, 2026</td><td class="px-2 py-2">Feb 20, 2026</td><td class="px-2 py-2">Active</td><td class="px-2 py-2">...</td></tr>
-                        <tr><td class="px-2 py-2">February 2026 - 2nd Half</td><td class="px-2 py-2">Feb 16, 2026</td><td class="px-2 py-2">Feb 28, 2026</td><td class="px-2 py-2">Mar 5, 2026</td><td class="px-2 py-2">Upcoming</td><td class="px-2 py-2">...</td></tr>
+                        @foreach ($periods as $period)
+                            <tr>
+                                <td class="px-2 py-2">{{ $period['period'] }}</td>
+                                <td class="px-2 py-2">{{ $period['start_date'] }}</td>
+                                <td class="px-2 py-2">{{ $period['end_date'] }}</td>
+                                <td class="px-2 py-2">{{ $period['pay_date'] }}</td>
+                                <td class="px-2 py-2">{{ $period['status'] }}</td>
+                                <td class="px-2 py-2">...</td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </article>
@@ -71,13 +79,13 @@
         <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
             <h3 class="text-lg font-bold">Work Schedules</h3>
             <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                @foreach (['Regular Office Hours', 'Flexible Schedule', 'Training Schedule', 'Security Shift A'] as $sched)
+                @foreach ($schedules as $sched)
                     <div class="rounded-xl border border-slate-300 bg-slate-50 p-3">
                         <div class="flex items-center justify-between">
-                            <p class="font-semibold">{{ $sched }}</p>
+                            <p class="font-semibold">{{ $sched['name'] }}</p>
                             <span class="text-xs text-slate-500">edit</span>
                         </div>
-                        <p class="mt-2 text-xs text-slate-500">7:00 AM - 5:00 PM</p>
+                        <p class="mt-2 text-xs text-slate-500">{{ $sched['time'] }}</p>
                     </div>
                 @endforeach
             </div>

@@ -5,9 +5,9 @@
 
 @section('content')
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Email Templates</p><p class="text-4xl font-extrabold">6</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">SMS Templates</p><p class="text-4xl font-extrabold">3</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">In-App Templates</p><p class="text-4xl font-extrabold">4</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Email Templates</p><p class="text-4xl font-extrabold">{{ $stats['email'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">SMS Templates</p><p class="text-4xl font-extrabold">{{ $stats['sms'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">In-App Templates</p><p class="text-4xl font-extrabold">{{ $stats['inapp'] }}</p></article>
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-3">
@@ -22,7 +22,7 @@
     <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
         <div class="space-y-2">
             <div class="template-list" data-template-panel="email">
-                @foreach (['Welcome Email', 'Password Reset', 'Leave Approved', 'Leave Rejected', 'PRC Expiration Warning', 'Compliance Reminder'] as $item)
+                @foreach ($templates['email'] as $item)
                     <div class="mb-2 flex items-center justify-between rounded-lg bg-[#cfe1f5] px-4 py-3">
                         <p class="font-semibold">{{ $item }}</p>
                         <span class="text-xs text-slate-500">edit</span>
@@ -31,7 +31,7 @@
             </div>
 
             <div class="template-list hidden" data-template-panel="sms">
-                @foreach (['OTP Verifications', 'Leave Status', 'PRC Alert'] as $item)
+                @foreach ($templates['sms'] as $item)
                     <div class="mb-2 flex items-center justify-between rounded-lg bg-[#cfe1f5] px-4 py-3">
                         <p class="font-semibold">{{ $item }}</p>
                         <span class="text-xs text-slate-500">edit</span>
@@ -40,7 +40,7 @@
             </div>
 
             <div class="template-list hidden" data-template-panel="inapp">
-                @foreach (['System Maintenance', 'New Feature', 'Policy Update', 'Compliance Alert'] as $item)
+                @foreach ($templates['inapp'] as $item)
                     <div class="mb-2 flex items-center justify-between rounded-lg bg-[#cfe1f5] px-4 py-3">
                         <p class="font-semibold">{{ $item }}</p>
                         <span class="text-xs text-slate-500">edit</span>
@@ -58,7 +58,7 @@
             <h4 class="text-lg font-bold">Available Template Variables</h4>
             <p class="text-xs text-slate-500">Use these variables in your templates to personalize content</p>
             <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                @foreach (['{{user_name}}', '{{user_email}}', '{{employee_id}}', '{{department}}', '{{leave_type}}', '{{leave_dates}}', '{{leave_status}}', '{{approver_name}}', '{{prc_number}}', '{{compliance_requirement}}', '{{deadline_date}}', '{{current_date}}'] as $token)
+                @foreach ($tokens as $token)
                     <span class="rounded bg-slate-200 px-2 py-1">{{ $token }}</span>
                 @endforeach
             </div>

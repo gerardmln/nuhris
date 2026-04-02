@@ -12,18 +12,16 @@
     <article class="rounded-2xl border border-slate-300 bg-white p-6 shadow-sm">
         <h2 class="text-3xl font-bold text-slate-900">Profile Information</h2>
 
-        <form class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3" method="POST" action="#">
+        <form class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3" method="POST" action="javascript:void(0)">
             @csrf
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Credential Type</label>
                 <select class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option>Select type</option>
-                    <option>Resume</option>
-                    <option>PRC License</option>
-                    <option>Seminar / Training</option>
-                    <option>Academic Degree</option>
-                    <option>Ranking File</option>
+                    @foreach ($credentialTypes as $type)
+                        <option>{{ $type }}</option>
+                    @endforeach
                 </select>
             </div>
 
@@ -36,9 +34,9 @@
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Department</label>
                 <select class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option>Select department</option>
-                    <option>Faculty</option>
-                    <option>Security</option>
-                    <option>ASP</option>
+                    @foreach ($departments as $department)
+                        <option @selected($employee && $employee->department && $employee->department->name === $department)>{{ $department }}</option>
+                    @endforeach
                 </select>
             </div>
 

@@ -52,6 +52,12 @@
             </header>
 
             <section class="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
+                @if (session('success'))
+                    <div class="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <h2 class="text-3xl font-bold text-[#1f2b5d]">Announcements</h2>
@@ -63,38 +69,37 @@
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
                         <p class="text-xs font-medium text-slate-500">Total</p>
-                        <p class="mt-1 text-4xl font-extrabold">3</p>
+                        <p class="mt-1 text-4xl font-extrabold">{{ $stats['total'] }}</p>
                     </article>
                     <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
                         <p class="text-xs font-medium text-slate-500">Active</p>
-                        <p class="mt-1 text-4xl font-extrabold">3</p>
+                        <p class="mt-1 text-4xl font-extrabold">{{ $stats['active'] }}</p>
                     </article>
                     <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
                         <p class="text-xs font-medium text-slate-500">Urgent</p>
-                        <p class="mt-1 text-4xl font-extrabold">1</p>
+                        <p class="mt-1 text-4xl font-extrabold">{{ $stats['urgent'] }}</p>
                     </article>
                     <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
                         <p class="text-xs font-medium text-slate-500">Current Month</p>
-                        <p class="mt-1 text-4xl font-extrabold">3</p>
+                        <p class="mt-1 text-4xl font-extrabold">{{ $stats['current_month'] }}</p>
                     </article>
                 </div>
 
                 <article class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
-                    <div class="grid grid-cols-1 gap-2 md:grid-cols-3">
+                    <form method="GET" action="{{ route('announcements.index') }}" class="grid grid-cols-1 gap-2 md:grid-cols-3">
                         <div class="md:col-span-2">
-                            <input type="text" placeholder="Search announcements..." class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none">
+                            <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Search announcements..." class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none">
                         </div>
-                        <div>
-                            <select class="w-full rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
-                                <option>All Types</option>
-                                <option>General</option>
-                                <option>Urgent</option>
-                                <option>Reminder</option>
-                                <option>Event</option>
-                                <option>Policy Update</option>
+                        <div class="flex gap-2">
+                            <select name="priority" class="w-full rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
+                                <option value="">All Types</option>
+                                <option value="high" @selected($filters['priority'] === 'high')>Urgent</option>
+                                <option value="medium" @selected($filters['priority'] === 'medium')>General</option>
+                                <option value="low" @selected($filters['priority'] === 'low')>Reminder</option>
                             </select>
+                            <button type="submit" class="rounded-md bg-[#00386f] px-3 py-2 text-xs font-semibold text-white hover:bg-[#002f5d]">Filter</button>
                         </div>
-                    </div>
+                    </form>
                 </article>
 
                 <div class="flex flex-wrap gap-2">
@@ -103,76 +108,42 @@
                 </div>
 
                 <div class="space-y-4">
-                    <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
-                        <div class="mb-2 flex items-start justify-between gap-3">
-                            <div class="flex flex-wrap items-center gap-1">
-                                <span class="rounded border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700">Urgent</span>
-                                <span class="rounded border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700">High</span>
-                                <span class="rounded border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700">Faculty Only</span>
-                            </div>
-                            <details class="relative">
-                                <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none text-slate-500 hover:bg-slate-100">...</summary>
-                                <div class="absolute right-0 z-20 mt-2 w-32 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
-                                    <a href="#" data-open-modal="edit-announcement-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-1.5 text-center text-xs font-semibold text-slate-800 hover:bg-slate-50">Edit</a>
-                                    <a href="#" class="mb-1 block rounded-lg border border-slate-300 px-3 py-1.5 text-center text-xs font-semibold text-slate-800 hover:bg-slate-50">Hide</a>
-                                    <a href="#" class="block rounded-lg border border-red-300 px-3 py-1.5 text-center text-xs font-semibold text-red-600 hover:bg-red-50">Delete</a>
+                    @forelse ($announcements as $announcement)
+                        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
+                            <div class="mb-2 flex items-start justify-between gap-3">
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <span class="rounded border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700">{{ ucfirst($announcement->priority) }}</span>
+                                    <span class="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700">{{ $announcement->audience_label }}</span>
                                 </div>
-                            </details>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-800">CHED Compliance Deadline Reminder</h3>
-                        <p class="mt-2 text-sm text-slate-600">This is a reminder that all faculty members must submit their updated curriculum vitae and credentials for the upcoming CHED compliance review. Please ensure your resume is updated in the system by January 31, 2025.</p>
-                        <div class="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
-                            <span>Jan 10, 2025</span>
-                            <span>Expires: Jan 31, 2025</span>
-                        </div>
-                    </article>
+                                <details class="relative">
+                                    <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none text-slate-500 hover:bg-slate-100">...</summary>
+                                    <div class="absolute right-0 z-20 mt-2 w-32 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
+                                        <form method="POST" action="{{ route('announcements.destroy', $announcement) }}" onsubmit="return confirm('Delete this announcement?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="block w-full rounded-lg border border-red-300 px-3 py-1.5 text-center text-xs font-semibold text-red-600 hover:bg-red-50">Delete</button>
+                                        </form>
+                                    </div>
+                                </details>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800">{{ $announcement->title }}</h3>
+                            <p class="mt-2 text-sm text-slate-600">{{ $announcement->content }}</p>
+                            <div class="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
+                                <span>{{ $announcement->published_at?->format('M d, Y') ?? $announcement->created_at->format('M d, Y') }}</span>
+                                @if ($announcement->expires_at)
+                                    <span>Expires: {{ $announcement->expires_at->format('M d, Y') }}</span>
+                                @endif
+                            </div>
+                        </article>
+                    @empty
+                        <article class="rounded-xl border border-slate-300 bg-white p-8 text-center text-sm text-slate-500 shadow-sm">
+                            No announcements yet.
+                        </article>
+                    @endforelse
+                </div>
 
-                    <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
-                        <div class="mb-2 flex items-start justify-between gap-3">
-                            <div class="flex flex-wrap items-center gap-1">
-                                <span class="rounded border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">Event</span>
-                                <span class="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700">Normal</span>
-                                <span class="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700">Faculty Only</span>
-                            </div>
-                            <details class="relative">
-                                <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none text-slate-500 hover:bg-slate-100">...</summary>
-                                <div class="absolute right-0 z-20 mt-2 w-32 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
-                                    <a href="#" data-open-modal="edit-announcement-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-1.5 text-center text-xs font-semibold text-slate-800 hover:bg-slate-50">Edit</a>
-                                    <a href="#" class="mb-1 block rounded-lg border border-slate-300 px-3 py-1.5 text-center text-xs font-semibold text-slate-800 hover:bg-slate-50">Hide</a>
-                                    <a href="#" class="block rounded-lg border border-red-300 px-3 py-1.5 text-center text-xs font-semibold text-red-600 hover:bg-red-50">Delete</a>
-                                </div>
-                            </details>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-800">Faculty Development Program Registration</h3>
-                        <p class="mt-2 text-sm text-slate-600">Registration is now open for the Faculty Development Program scheduled for February 2025. Topics include research methodology, teaching innovations, and academic writing. Register through HR.</p>
-                        <div class="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
-                            <span>Jan 8, 2025</span>
-                            <span>Expires: Feb 1, 2025</span>
-                        </div>
-                    </article>
-
-                    <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
-                        <div class="mb-2 flex items-start justify-between gap-3">
-                            <div class="flex flex-wrap items-center gap-1">
-                                <span class="rounded border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">Policy Update</span>
-                                <span class="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700">Normal</span>
-                                <span class="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700">Everyone</span>
-                            </div>
-                            <details class="relative">
-                                <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none text-slate-500 hover:bg-slate-100">...</summary>
-                                <div class="absolute right-0 z-20 mt-2 w-32 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
-                                    <a href="#" data-open-modal="edit-announcement-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-1.5 text-center text-xs font-semibold text-slate-800 hover:bg-slate-50">Edit</a>
-                                    <a href="#" class="mb-1 block rounded-lg border border-slate-300 px-3 py-1.5 text-center text-xs font-semibold text-slate-800 hover:bg-slate-50">Hide</a>
-                                    <a href="#" class="block rounded-lg border border-red-300 px-3 py-1.5 text-center text-xs font-semibold text-red-600 hover:bg-red-50">Delete</a>
-                                </div>
-                            </details>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-800">Updated Leave Policy</h3>
-                        <p class="mt-2 text-sm text-slate-600">Please be informed of the updated leave policy effective January 1, 2025. Key changes include revised sick leave documentation requirements and new parental leave benefits. Full policy document available at HR.</p>
-                        <div class="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
-                            <span>Jan 5, 2025</span>
-                        </div>
-                    </article>
+                <div>
+                    {{ $announcements->links() }}
                 </div>
 
                 <div class="h-8"></div>
@@ -190,74 +161,61 @@
                 <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <div class="px-8 pb-8">
+            <form method="POST" action="{{ route('announcements.store') }}" class="px-8 pb-8">
+                @csrf
                 <div class="space-y-4">
                     <div>
                         <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Title *</label>
-                        <input type="text" placeholder="Announcement title" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
+                        <input name="title" type="text" placeholder="Announcement title" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none" required>
                     </div>
 
                     <div>
                         <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Content *</label>
-                        <textarea rows="4" placeholder="Write your announcement here..." class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none"></textarea>
+                        <textarea name="content" rows="4" placeholder="Write your announcement here..." class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none" required></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
                             <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Priority</label>
-                            <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
-                                <option>Medium</option>
-                                <option>Low</option>
-                                <option>High</option>
+                            <select name="priority" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                                <option value="high">High</option>
                             </select>
                         </div>
                         <div>
                             <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Target Audience</label>
-                            <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
-                                <option>Specific Department</option>
-                                <option>Faculty Only</option>
-                                <option>Everyone</option>
+                            <select name="target_user_type" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
+                                <option value="">Everyone</option>
+                                <option value="1">Admin</option>
+                                <option value="2">HR</option>
+                                <option value="3">Employee</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Target Department</label>
-                        <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
-                            <option>Select Department</option>
-                            <option>College of Engineering</option>
-                            <option>College of Business</option>
-                            <option>College of Education</option>
-                            <option>College of Arts &amp; Sciences</option>
-                            <option>College of Computing</option>
-                            <option>College of Allied Health</option>
-                            <option>Administration</option>
-                            <option>Human Resources</option>
-                        </select>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
                             <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Publish Date</label>
-                            <input type="date" value="2026-02-01" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
+                            <input name="published_at" type="date" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
                         </div>
                         <div>
                             <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Expiry Date</label>
-                            <input type="date" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
+                            <input name="expires_at" type="date" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
                         </div>
                     </div>
 
                     <div class="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2">
                         <label for="publish-now-new" class="text-xl font-semibold text-[#1f2b8b]">Publish immediately</label>
-                        <input id="publish-now-new" type="checkbox" class="h-5 w-10 cursor-pointer accent-[#1f2b8b]">
+                        <input id="publish-now-new" name="is_published" type="checkbox" checked value="1" class="h-5 w-10 cursor-pointer accent-[#1f2b8b]">
                     </div>
                 </div>
 
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
                     <button type="button" data-close-modal class="rounded-md border border-slate-400 px-6 py-2 text-lg font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-                    <button type="button" data-close-modal class="rounded-md bg-[#00386f] px-6 py-2 text-lg font-semibold text-white hover:bg-[#002f5d]">Post announcement</button>
+                    <button type="submit" class="rounded-md bg-[#00386f] px-6 py-2 text-lg font-semibold text-white hover:bg-[#002f5d]">Post announcement</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 

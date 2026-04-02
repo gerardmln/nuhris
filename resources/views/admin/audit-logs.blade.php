@@ -5,10 +5,10 @@
 
 @section('content')
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Total Logs Today</p><p class="text-4xl font-extrabold">5</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Successful Actions</p><p class="text-4xl font-extrabold">5</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Failed Actions</p><p class="text-4xl font-extrabold">12</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Active Users</p><p class="text-4xl font-extrabold">5</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Total Logs Today</p><p class="text-4xl font-extrabold">{{ $stats['total'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Successful Actions</p><p class="text-4xl font-extrabold">{{ $stats['success'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Failed Actions</p><p class="text-4xl font-extrabold">{{ $stats['failed'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Active Users</p><p class="text-4xl font-extrabold">{{ $stats['active_users'] }}</p></article>
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
@@ -45,9 +45,18 @@
         <table class="mt-3 min-w-full text-left text-xs">
             <thead class="bg-slate-100"><tr><th class="px-2 py-2">Timestamp</th><th class="px-2 py-2">User</th><th class="px-2 py-2">Action</th><th class="px-2 py-2">Module</th><th class="px-2 py-2">Description</th><th class="px-2 py-2">Status</th></tr></thead>
             <tbody class="divide-y divide-slate-200">
-                <tr><td class="px-2 py-2">2026-02-15 10:45:23</td><td class="px-2 py-2">Ana Reyes</td><td class="px-2 py-2">UPDATE</td><td class="px-2 py-2">User Management</td><td class="px-2 py-2">Updated user role for Juan Dela Cruz</td><td class="px-2 py-2 text-emerald-700">Success</td></tr>
-                <tr><td class="px-2 py-2">2026-02-15 10:30:00</td><td class="px-2 py-2">System</td><td class="px-2 py-2">CREATE</td><td class="px-2 py-2">Compliance</td><td class="px-2 py-2">Auto-generated PRC expiration alert</td><td class="px-2 py-2 text-emerald-700">Success</td></tr>
-                <tr><td class="px-2 py-2">2026-02-15 09:45:33</td><td class="px-2 py-2">Unknown</td><td class="px-2 py-2">LOGIN</td><td class="px-2 py-2">Authentication</td><td class="px-2 py-2">Failed login attempt - invalid credentials</td><td class="px-2 py-2 text-red-700">Failed</td></tr>
+                @forelse ($logs as $log)
+                    <tr>
+                        <td class="px-2 py-2">{{ $log['timestamp'] }}</td>
+                        <td class="px-2 py-2">{{ $log['user'] }}</td>
+                        <td class="px-2 py-2">{{ $log['action'] }}</td>
+                        <td class="px-2 py-2">{{ $log['module'] }}</td>
+                        <td class="px-2 py-2">{{ $log['description'] }}</td>
+                        <td class="px-2 py-2 {{ $log['status'] === 'Success' ? 'text-emerald-700' : 'text-red-700' }}">{{ $log['status'] }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="6" class="px-2 py-4 text-center text-slate-500">No logs found.</td></tr>
+                @endforelse
             </tbody>
         </table>
     </article>

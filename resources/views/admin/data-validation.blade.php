@@ -5,10 +5,10 @@
 
 @section('content')
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Validation Rules</p><p class="text-4xl font-extrabold">5</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Active Rules</p><p class="text-4xl font-extrabold">6</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Required Field Sets</p><p class="text-4xl font-extrabold">4</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Errors Today</p><p class="text-4xl font-extrabold">23</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Validation Rules</p><p class="text-4xl font-extrabold">{{ $stats['rules'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Active Rules</p><p class="text-4xl font-extrabold">{{ $stats['active_rules'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Required Field Sets</p><p class="text-4xl font-extrabold">{{ $stats['required_sets'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Errors Today</p><p class="text-4xl font-extrabold">{{ $stats['errors_today'] }}</p></article>
     </div>
 
     <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
@@ -17,7 +17,7 @@
             <button id="open-validation-rule-modal" class="rounded-lg bg-[#242b34] px-4 py-2 text-xs font-semibold text-white">+ Add Rule</button>
         </div>
         <div class="space-y-2">
-            @foreach (['PRC Expiration', 'Phone Number', 'PRC License Format', 'Employee ID', 'Date of Birth', 'Salary Range'] as $item)
+            @foreach ($validationRules as $item)
                 <div class="flex items-center justify-between rounded-lg bg-[#cfe1f5] px-4 py-3">
                     <p class="font-semibold">{{ $item }}</p>
                     <span class="text-xs text-slate-500">enabled</span>
@@ -29,7 +29,7 @@
     <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
         <h3 class="text-2xl font-bold text-[#24358a]">Required Fields Configuration</h3>
         <div class="mt-3 space-y-2">
-            @foreach (['PRC Expiration', 'Faculty Records', 'Leave Requests', 'Payroll Data'] as $item)
+            @foreach ($requiredFields as $item)
                 <div class="flex items-center justify-between rounded-lg bg-[#cfe1f5] px-4 py-3">
                     <p class="font-semibold">{{ $item }}</p>
                     <span class="text-xs text-slate-500">Configure</span>

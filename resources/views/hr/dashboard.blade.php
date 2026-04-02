@@ -69,19 +69,19 @@
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
                         <p class="text-xs font-medium text-slate-500">Total Employees</p>
-                        <p class="mt-1 text-4xl font-extrabold">5</p>
+                        <p class="mt-1 text-4xl font-extrabold">{{ $stats['total_employees'] }}</p>
                     </article>
                     <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
                         <p class="text-xs font-medium text-slate-500">Pending Credentials</p>
-                        <p class="mt-1 text-4xl font-extrabold">4</p>
+                        <p class="mt-1 text-4xl font-extrabold">{{ $stats['pending_credentials'] }}</p>
                     </article>
                     <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
                         <p class="text-xs font-medium text-slate-500">Present Today</p>
-                        <p class="mt-1 text-4xl font-extrabold">5</p>
+                        <p class="mt-1 text-4xl font-extrabold">{{ $stats['present_today'] }}</p>
                     </article>
                     <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
                         <p class="text-xs font-medium text-slate-500">Expiring Licenses</p>
-                        <p class="mt-1 text-4xl font-extrabold">0</p>
+                        <p class="mt-1 text-4xl font-extrabold">{{ $stats['expiring_licenses'] }}</p>
                     </article>
                 </div>
 
@@ -164,18 +164,16 @@
                             </div>
 
                             <div class="space-y-3">
-                                <div class="rounded-lg border border-slate-200 px-3 py-2">
-                                    <p class="text-sm font-semibold">CHED Compliance Deadline Reminder</p>
-                                    <p class="text-xs text-slate-500">Jun 10, 2025</p>
-                                </div>
-                                <div class="rounded-lg border border-slate-200 px-3 py-2">
-                                    <p class="text-sm font-semibold">Faculty Development Program Registration</p>
-                                    <p class="text-xs text-slate-500">Jun 8, 2025</p>
-                                </div>
-                                <div class="rounded-lg border border-slate-200 px-3 py-2">
-                                    <p class="text-sm font-semibold">Updated Leave Policy</p>
-                                    <p class="text-xs text-slate-500">Jun 5, 2025</p>
-                                </div>
+                                @forelse($announcements as $announcement)
+                                    <div class="rounded-lg border border-slate-200 px-3 py-2">
+                                        <p class="text-sm font-semibold">{{ $announcement->title }}</p>
+                                        <p class="text-xs text-slate-500">{{ $announcement->published_at->format('M d, Y') }}</p>
+                                    </div>
+                                @empty
+                                    <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-4 text-center">
+                                        <p class="text-sm text-slate-500">No announcements yet</p>
+                                    </div>
+                                @endforelse
                             </div>
                         </article>
                     </div>

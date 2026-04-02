@@ -1,195 +1,76 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Leave Management | {{ config('app.name', 'NU HRIS') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-[#eceef1] text-slate-900 antialiased overflow-x-hidden overflow-y-auto">
-    <div class="flex min-h-screen flex-col lg:flex-row">
-        <aside class="w-full bg-[#00386f] text-white lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:shrink-0">
-            <div class="border-b border-white/20 px-6 py-5">
-                <p class="text-2xl font-extrabold tracking-wide">NU HRIS</p>
-                <p class="text-sm text-blue-100">Human Resources</p>
+@extends('hr.layout')
+
+@php
+    $pageTitle = 'Leave Management';
+    $pageHeading = 'Leave';
+    $activeNav = 'leave';
+@endphp
+
+@section('content')
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+            <h2 class="text-3xl font-bold text-[#1f2b5d]">Leave Management</h2>
+            <p class="text-sm text-slate-500">View and manage employee leave balances</p>
+        </div>
+        <button data-open-modal="upload-biometrics-modal" class="rounded-lg bg-[#00386f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">Upload Biometrics</button>
+    </div>
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
+            <p class="text-xs font-medium text-slate-500">Total Employees</p>
+            <p class="mt-1 text-4xl font-extrabold">{{ $stats['total_employees'] }}</p>
+        </article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
+            <p class="text-xs font-medium text-slate-500">Vacation Used</p>
+            <p class="mt-1 text-4xl font-extrabold">{{ $stats['vacation_used'] }}</p>
+        </article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
+            <p class="text-xs font-medium text-slate-500">Sick Leave Used</p>
+            <p class="mt-1 text-4xl font-extrabold">{{ $stats['sick_used'] }}</p>
+        </article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
+            <p class="text-xs font-medium text-slate-500">Current Year</p>
+            <p class="mt-1 text-4xl font-extrabold">{{ $stats['current_year'] }}</p>
+        </article>
+    </div>
+
+    <article class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
+        <div class="grid grid-cols-1 gap-2 md:grid-cols-3">
+            <div class="md:col-span-2">
+                <input type="text" placeholder="Search Employees" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none">
             </div>
-
-            <nav class="px-4 py-4">
-                <ul class="space-y-2 text-[15px]">
-                    <li><a href="{{ route('dashboard') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Dashboard</a></li>
-                    <li><a href="{{ route('employees.index') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Employees</a></li>
-                    <li><a href="{{ route('credentials.index') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Credentials</a></li>
-                    <li><a href="{{ route('timekeeping.index') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Time Keeping</a></li>
-                    <li>
-                        <a href="{{ route('leave.index') }}" class="flex items-center gap-2 rounded-xl bg-[#ffdc00] px-4 py-2 font-semibold text-slate-900 shadow-sm">
-                            <span class="h-2 w-2 rounded-full bg-slate-900"></span>
-                            Leave Management
-                        </a>
-                    </li>
-                    <li><a href="{{ route('announcements.index') }}" class="block rounded-xl bg-indigo-900/70 px-4 py-2 hover:bg-indigo-900">Announcements</a></li>
-                </ul>
-            </nav>
-
-            <div class="mt-8 border-t border-white/20 px-5 py-5 lg:mt-auto">
-                <div class="mb-4">
-                    <p class="text-sm font-semibold">{{ auth()->user()->name ?? 'Martinez, Ian Isaac' }}</p>
-                    <p class="text-xs text-blue-100">{{ auth()->user()->email ?? 'user' }}</p>
-                </div>
+            <div class="grid grid-cols-2 gap-2">
+                <select class="rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
+                    <option>All Departments</option>
+                    @foreach ($departments as $department)
+                        <option>{{ $department->name }}</option>
+                    @endforeach
+                </select>
+                <select class="rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
+                    <option>{{ now()->format('F Y') }}</option>
+                </select>
             </div>
-        </aside>
+        </div>
+    </article>
 
-        <main class="min-h-screen flex-1">
-            <header class="border-b border-slate-300 bg-white px-6 py-4">
-                <div class="flex items-center justify-between">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        @foreach ($leaveCards as $card)
+            <article data-faculty-card data-name="{{ $card['name'] }}" data-department="{{ $card['department'] }}" data-remaining="{{ $card['remaining'] }}" data-used="{{ $card['used'] }}" class="cursor-pointer rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md">
+                <div class="mb-3 flex items-center gap-3">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#00386f] text-sm font-semibold text-white">{{ $card['initials'] }}</span>
                     <div>
-                        <h1 class="text-[30px] font-bold leading-none text-[#1f2b5d]">Leave</h1>
-                        <p class="text-sm text-slate-500">National University HRIS</p>
+                        <p class="text-xl font-bold text-[#1f2b5d]">{{ $card['name'] }}</p>
+                        <p class="text-sm text-slate-500">{{ $card['department'] }}</p>
                     </div>
-
-                    @include('partials.header-actions')
                 </div>
-            </header>
-
-            <section class="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <h2 class="text-3xl font-bold text-[#1f2b5d]">Leave Management</h2>
-                        <p class="text-sm text-slate-500">View and manage employee leave balances</p>
-                    </div>
-                    <button data-open-modal="upload-biometrics-modal" class="rounded-lg bg-[#00386f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">Upload Biometrics</button>
+                <div class="space-y-2">
+                    <div><p class="mb-1 text-xs text-slate-500">Vacation Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-4/5 rounded bg-emerald-700"></div></div></div>
+                    <div><p class="mb-1 text-xs text-slate-500">Sick Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-3/4 rounded bg-amber-500"></div></div></div>
+                    <div><p class="mb-1 text-xs text-slate-500">Emergency Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-full rounded bg-violet-600"></div></div></div>
                 </div>
-
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
-                        <p class="text-xs font-medium text-slate-500">Total Employees</p>
-                        <p class="mt-1 text-4xl font-extrabold">5</p>
-                    </article>
-                    <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
-                        <p class="text-xs font-medium text-slate-500">Vacation Used</p>
-                        <p class="mt-1 text-4xl font-extrabold">18</p>
-                    </article>
-                    <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
-                        <p class="text-xs font-medium text-slate-500">Sick Leave Used</p>
-                        <p class="mt-1 text-4xl font-extrabold">8</p>
-                    </article>
-                    <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
-                        <p class="text-xs font-medium text-slate-500">Current Year</p>
-                        <p class="mt-1 text-4xl font-extrabold">2026</p>
-                    </article>
-                </div>
-
-                <article class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
-                    <div class="grid grid-cols-1 gap-2 md:grid-cols-3">
-                        <div class="md:col-span-2">
-                            <input type="text" placeholder="Search Employees" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none">
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <select class="rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
-                                <option>All Departments</option>
-                                <option>College of Engineering</option>
-                                <option>College of Business</option>
-                                <option>College of Education</option>
-                                <option>College of Arts &amp; Sciences</option>
-                                <option>College of Computing</option>
-                                <option>College of Allied Health</option>
-                                <option>Administration</option>
-                                <option>Human Resources</option>
-                            </select>
-                            <select class="rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
-                                <option>January 2026</option>
-                                <option>February 2026</option>
-                                <option>March 2026</option>
-                            </select>
-                        </div>
-                    </div>
-                </article>
-
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <article data-faculty-card data-name="Maria Santos" data-remaining="32" data-used="6" class="cursor-pointer rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md">
-                        <div class="mb-3 flex items-center gap-3">
-                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#00386f] text-sm font-semibold text-white">MS</span>
-                            <div>
-                                <p class="text-xl font-bold text-[#1f2b5d]">Maria Santos</p>
-                                <p class="text-sm text-slate-500">College of Computing</p>
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <div><p class="mb-1 text-xs text-slate-500">Vacation Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-4/5 rounded bg-emerald-700"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Sick Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-3/4 rounded bg-amber-500"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Emergency Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-full rounded bg-violet-600"></div></div></div>
-                        </div>
-                        <p class="mt-3 inline-block rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">+5 unused from previous year</p>
-                    </article>
-
-                    <article data-faculty-card data-name="Juan Dela Cruz" data-remaining="28" data-used="10" class="cursor-pointer rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md">
-                        <div class="mb-3 flex items-center gap-3">
-                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#00386f] text-sm font-semibold text-white">JD</span>
-                            <div>
-                                <p class="text-xl font-bold text-[#1f2b5d]">Juan Dela Cruz</p>
-                                <p class="text-sm text-slate-500">College of Engineering</p>
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <div><p class="mb-1 text-xs text-slate-500">Vacation Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-2/3 rounded bg-emerald-700"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Sick Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-11/12 rounded bg-amber-500"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Emergency Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-2/3 rounded bg-violet-600"></div></div></div>
-                        </div>
-                        <p class="mt-3 inline-block rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">+3 unused from previous year</p>
-                    </article>
-
-                    <article data-faculty-card data-name="Ana Reyes" data-remaining="30" data-used="8" class="cursor-pointer rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md">
-                        <div class="mb-3 flex items-center gap-3">
-                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#00386f] text-sm font-semibold text-white">AR</span>
-                            <div>
-                                <p class="text-xl font-bold text-[#1f2b5d]">Ana Reyes</p>
-                                <p class="text-sm text-slate-500">College of Business</p>
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <div><p class="mb-1 text-xs text-slate-500">Vacation Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-3/4 rounded bg-emerald-700"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Sick Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-2/3 rounded bg-amber-500"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Emergency Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-full rounded bg-violet-600"></div></div></div>
-                        </div>
-                        <p class="mt-3 inline-block rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">+5 unused from previous year</p>
-                    </article>
-
-                    <article data-faculty-card data-name="Carlos Garcia" data-remaining="24" data-used="12" class="cursor-pointer rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md">
-                        <div class="mb-3 flex items-center gap-3">
-                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#00386f] text-sm font-semibold text-white">CG</span>
-                            <div>
-                                <p class="text-xl font-bold text-[#1f2b5d]">Carlos Garcia</p>
-                                <p class="text-sm text-slate-500">College of Education</p>
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <div><p class="mb-1 text-xs text-slate-500">Vacation Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-1/2 rounded bg-emerald-700"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Sick Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-full rounded bg-amber-500"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Emergency Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-1/3 rounded bg-violet-600"></div></div></div>
-                        </div>
-                        <p class="mt-3 inline-block rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">+3 unused from previous year</p>
-                    </article>
-
-                    <article data-faculty-card data-name="Lisa Mendoza" data-remaining="34" data-used="5" class="cursor-pointer rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md md:col-span-2 lg:col-span-1">
-                        <div class="mb-3 flex items-center gap-3">
-                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#00386f] text-sm font-semibold text-white">LM</span>
-                            <div>
-                                <p class="text-xl font-bold text-[#1f2b5d]">Lisa Mendoza</p>
-                                <p class="text-sm text-slate-500">Human Resources</p>
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <div><p class="mb-1 text-xs text-slate-500">Vacation Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-11/12 rounded bg-emerald-700"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Sick Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-11/12 rounded bg-amber-500"></div></div></div>
-                            <div><p class="mb-1 text-xs text-slate-500">Emergency Leave</p><div class="h-1.5 rounded bg-slate-200"><div class="h-1.5 w-full rounded bg-violet-600"></div></div></div>
-                        </div>
-                        <p class="mt-3 inline-block rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">+5 unused from previous year</p>
-                    </article>
-                </div>
-
-                <div class="h-8"></div>
-            </section>
-        </main>
+                <p class="mt-3 inline-block rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">+{{ $card['carry_over'] }} unused from previous year</p>
+            </article>
+        @endforeach
     </div>
 
     <div id="upload-biometrics-modal" class="fixed inset-0 z-50 hidden items-start justify-center overflow-y-auto bg-black/45 p-4 py-6 sm:items-center">
@@ -199,10 +80,12 @@
                 <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <div class="px-7 pb-7">
-                <label class="mb-3 block text-2xl font-medium text-slate-700">Biometric File (PDF)</label>
+            <form class="px-7 pb-7" method="POST" action="{{ route('biometrics.upload') }}" enctype="multipart/form-data">
+                @csrf
+                <label class="mb-3 block text-2xl font-medium text-slate-700">Biometric File (PDF only)</label>
 
-                <div class="rounded-lg border border-dashed border-slate-400 p-8 text-center">
+                <label for="biometrics_file_leave" class="block cursor-pointer rounded-lg border border-dashed border-slate-400 p-8 text-center">
+                    <input id="biometrics_file_leave" name="biometrics_file" type="file" accept="application/pdf,.pdf" class="sr-only" required>
                     <div class="mx-auto inline-flex h-14 w-14 items-center justify-center text-slate-400">
                         <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M12 16V4" />
@@ -211,46 +94,46 @@
                         </svg>
                     </div>
                     <p class="mt-3 text-lg text-slate-500">Click to upload or drag and drop</p>
-                    <p class="text-sm text-slate-400">PDF, CSV, or XLSX</p>
-                </div>
+                    <p class="text-sm text-slate-400">PDF only</p>
+                </label>
 
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                     <button type="button" data-close-modal class="rounded-md border border-slate-400 px-8 py-2.5 text-lg font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-                    <button type="button" data-close-modal class="inline-flex items-center justify-center gap-2 rounded-md bg-[#00386f] px-8 py-2.5 text-lg font-semibold text-white hover:bg-[#002f5d]">
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-md bg-[#00386f] px-8 py-2.5 text-lg font-semibold text-white hover:bg-[#002f5d]">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="9"></circle>
                             <path d="m9 12 2 2 4-4"></path>
                         </svg>
-                        Process File
+                        Process PDF
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <div id="leave-details-modal" class="fixed inset-0 z-50 hidden items-start justify-center overflow-y-auto bg-black/45 p-4 py-6 sm:items-center">
         <div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div class="flex items-start justify-between px-7 py-6">
-                <h3 class="text-4xl font-bold text-[#1f2b8b]">Leave Details - <span id="leave-details-name">Maria Santos</span></h3>
+                <h3 class="text-4xl font-bold text-[#1f2b8b]">Leave Details - <span id="leave-details-name">Employee</span></h3>
                 <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
             <div class="px-7 pb-7">
                 <div class="rounded-xl bg-slate-200 p-1">
                     <div class="grid grid-cols-2 gap-2 text-center text-2xl font-semibold text-[#1f2b8b]">
-                        <button type="button" data-leave-tab="balance" class="rounded-lg bg-white px-4 py-2 text-[#1f2b8b]">Leave Balance</button>
-                        <button type="button" data-leave-tab="history" class="rounded-lg px-4 py-2 text-slate-600">Leave History</button>
+                        <button type="button" data-leave-tab="balance" class="leave-tab-btn rounded-lg bg-white px-4 py-2 text-[#1f2b8b]">Leave Balance</button>
+                        <button type="button" data-leave-tab="history" class="leave-tab-btn rounded-lg px-4 py-2 text-slate-600">Leave History</button>
                     </div>
                 </div>
 
                 <section id="leave-balance-content" class="mt-5">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <article class="rounded-xl border border-slate-300 bg-white p-6 text-center shadow-sm">
-                            <p id="leave-remaining-days" class="text-6xl font-extrabold text-emerald-700">32</p>
+                            <p id="leave-remaining-days" class="text-6xl font-extrabold text-emerald-700">0</p>
                             <p class="text-3xl text-slate-700">Remaining Days</p>
                         </article>
                         <article class="rounded-xl border border-slate-300 bg-white p-6 text-center shadow-sm">
-                            <p id="leave-used-days" class="text-6xl font-extrabold text-amber-600">6</p>
+                            <p id="leave-used-days" class="text-6xl font-extrabold text-amber-600">0</p>
                             <p class="text-3xl text-slate-700">Days Used</p>
                         </article>
                     </div>
@@ -362,6 +245,45 @@
         </div>
     </div>
 
+    <div id="leave-details-modal" class="fixed inset-0 z-50 hidden items-start justify-center overflow-y-auto bg-black/45 p-4 py-6 sm:items-center">
+        <div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-start justify-between px-7 py-6">
+                <h3 class="text-4xl font-bold text-[#1f2b8b]">Leave Details - <span id="leave-details-name">Employee</span></h3>
+                <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
+            </div>
+
+            <div class="px-7 pb-7">
+                <div class="rounded-xl bg-slate-200 p-1">
+                    <div class="grid grid-cols-2 gap-2 text-center text-2xl font-semibold text-[#1f2b8b]">
+                        <button type="button" data-leave-tab="balance" class="leave-tab-btn rounded-lg bg-white px-4 py-2 text-[#1f2b8b]">Leave Balance</button>
+                        <button type="button" data-leave-tab="history" class="leave-tab-btn rounded-lg px-4 py-2 text-slate-600">Leave History</button>
+                    </div>
+                </div>
+
+                <section id="leave-balance-content" class="mt-5">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <article class="rounded-xl border border-slate-300 bg-white p-6 text-center shadow-sm">
+                            <p id="leave-remaining-days" class="text-6xl font-extrabold text-emerald-700">0</p>
+                            <p class="text-3xl text-slate-700">Remaining Days</p>
+                        </article>
+                        <article class="rounded-xl border border-slate-300 bg-white p-6 text-center shadow-sm">
+                            <p id="leave-used-days" class="text-6xl font-extrabold text-amber-600">0</p>
+                            <p class="text-3xl text-slate-700">Days Used</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="leave-history-content" class="mt-5 hidden">
+                    <article class="rounded-xl border border-slate-300 bg-white p-6 shadow-sm">
+                        <p class="text-slate-500">Leave history is shown in the main table above.</p>
+                    </article>
+                </section>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
     <script>
         const openButtons = document.querySelectorAll('[data-open-modal]');
         const closeButtons = document.querySelectorAll('[data-close-modal]');
@@ -376,6 +298,8 @@
         }
 
         function closeModal(modal) {
+            if (!modal) return;
+
             modal.classList.add('hidden');
             modal.classList.remove('flex');
 
@@ -444,7 +368,7 @@
 
         facultyCards.forEach((card) => {
             card.addEventListener('click', () => {
-                leaveName.textContent = card.dataset.name || 'Faculty';
+                leaveName.textContent = card.dataset.name || 'Employee';
                 remainingDays.textContent = card.dataset.remaining || '0';
                 usedDays.textContent = card.dataset.used || '0';
                 setLeaveTab('balance');
@@ -452,5 +376,4 @@
             });
         });
     </script>
-</body>
-</html>
+@endpush

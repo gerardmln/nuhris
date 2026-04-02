@@ -10,17 +10,42 @@
     </div>
 
     <div class="inline-flex flex-wrap items-center gap-1 rounded-xl bg-[#c7c7c9] p-1 text-xs font-semibold text-slate-900">
-        <button type="button" data-filter="all" class="cred-filter rounded-lg bg-[#d9d9db] px-4 py-2">All</button>
-        <button type="button" data-filter="resume" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">Resume</button>
-        <button type="button" data-filter="prc" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">PRC License</button>
-        <button type="button" data-filter="seminars" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">Seminars</button>
-        <button type="button" data-filter="degrees" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">Degrees</button>
-        <button type="button" data-filter="ranking" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">Ranking</button>
+        <button type="button" data-filter="all" class="cred-filter rounded-lg bg-[#d9d9db] px-4 py-2">All ({{ $credentialCounts['all'] }})</button>
+        <button type="button" data-filter="resume" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">Resume ({{ $credentialCounts['resume'] }})</button>
+        <button type="button" data-filter="prc" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">PRC License ({{ $credentialCounts['prc'] }})</button>
+        <button type="button" data-filter="seminars" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">Seminars ({{ $credentialCounts['seminars'] }})</button>
+        <button type="button" data-filter="degrees" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">Degrees ({{ $credentialCounts['degrees'] }})</button>
+        <button type="button" data-filter="ranking" class="cred-filter rounded-lg px-4 py-2 hover:bg-[#d9d9db]">Ranking ({{ $credentialCounts['ranking'] }})</button>
     </div>
 
-    <div class="grid place-items-center py-24">
-        <p id="credentials-empty" class="text-3xl text-slate-400">No credentials found. Upload your first credential above</p>
-    </div>
+    @if ($credentials->isEmpty())
+        <div class="grid place-items-center py-24">
+            <p id="credentials-empty" class="text-3xl text-slate-400">No credentials found. Upload your first credential above</p>
+        </div>
+    @else
+        <article class="overflow-x-auto rounded-2xl border border-slate-300 bg-white shadow-sm">
+            <table class="min-w-full text-left text-sm">
+                <thead class="bg-slate-100 text-slate-600">
+                    <tr>
+                        <th class="px-4 py-3">Type</th>
+                        <th class="px-4 py-3">Title</th>
+                        <th class="px-4 py-3">Status</th>
+                        <th class="px-4 py-3">Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    @foreach ($credentials as $credential)
+                        <tr>
+                            <td class="px-4 py-3">{{ $credential['label'] }}</td>
+                            <td class="px-4 py-3">{{ $credential['title'] }}</td>
+                            <td class="px-4 py-3">{{ $credential['status'] }}</td>
+                            <td class="px-4 py-3">{{ optional($credential['updated_at'])->format('M d, Y') }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </article>
+    @endif
 @endsection
 
 @push('scripts')

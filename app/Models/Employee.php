@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Employee extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'employee_id',
+        'first_name',
+        'last_name',
+        'email',
+        'phone',
+        'department_id',
+        'position',
+        'employment_type',
+        'ranking',
+        'status',
+        'hire_date',
+        'official_time_in',
+        'official_time_out',
+        'resume_last_updated_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'hire_date' => 'date',
+            'official_time_in' => 'datetime:H:i',
+            'official_time_out' => 'datetime:H:i',
+            'resume_last_updated_at' => 'date',
+        ];
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name.' '.$this->last_name);
+    }
+}

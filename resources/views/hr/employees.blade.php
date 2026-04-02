@@ -63,6 +63,12 @@
             </header>
 
             <section class="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
+                @if (session('success'))
+                    <div class="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <h2 class="text-3xl font-bold text-[#1f2b5d]">Employees</h2>
@@ -72,35 +78,35 @@
                 </div>
 
                 <article class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
-                    <div class="grid grid-cols-1 gap-2 md:grid-cols-3">
+                    <form method="GET" action="{{ route('employees.index') }}" class="grid grid-cols-1 gap-2 md:grid-cols-3">
                         <div class="md:col-span-2">
                             <input
                                 type="text"
+                                name="search"
+                                value="{{ $filters['search'] }}"
                                 placeholder="Search by name, email, or ID..."
                                 class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
                             >
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <select class="rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
-                                <option>All Departments</option>
-                                <option>College of Engineering</option>
-                                <option>College of Business</option>
-                                <option>College of Education</option>
-                                <option>College of Arts &amp; Sciences</option>
-                                <option>College of Computing</option>
-                                <option>College of Allied Health</option>
-                                <option>Administration</option>
-                                <option>Human Resources</option>
+                            <select name="department_id" class="rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
+                                <option value="">All Departments</option>
+                                @foreach ($departments as $department)
+                                    <option value="{{ $department->id }}" @selected($filters['department_id'] == $department->id)>{{ $department->name }}</option>
+                                @endforeach
                             </select>
-                            <select class="rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
-                                <option>All Status</option>
-                                <option>Active</option>
-                                <option>On Leave</option>
-                                <option>Resigned</option>
-                                <option>Terminated</option>
-                            </select>
+                            <div class="flex gap-2">
+                                <select name="status" class="w-full rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
+                                    <option value="">All Status</option>
+                                    <option value="active" @selected($filters['status'] === 'active')>Active</option>
+                                    <option value="on_leave" @selected($filters['status'] === 'on_leave')>On Leave</option>
+                                    <option value="resigned" @selected($filters['status'] === 'resigned')>Resigned</option>
+                                    <option value="terminated" @selected($filters['status'] === 'terminated')>Terminated</option>
+                                </select>
+                                <button type="submit" class="rounded-md bg-[#00386f] px-3 py-2 text-xs font-semibold text-white hover:bg-[#002f5d]">Filter</button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </article>
 
                 <article class="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-sm">
@@ -116,143 +122,99 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200">
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-5 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#00386f] text-xs font-semibold text-white">MS</span>
-                                        <div>
-                                            <p class="font-semibold text-slate-800">Maria Santos</p>
-                                            <p class="text-xs text-slate-500">maria.santos@nu.edu.ph</p>
+                            @forelse ($employees as $employee)
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-5 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#00386f] text-xs font-semibold text-white">
+                                                {{ strtoupper(substr($employee->first_name, 0, 1).substr($employee->last_name, 0, 1)) }}
+                                            </span>
+                                            <div>
+                                                <p class="font-semibold text-slate-800">{{ $employee->full_name }}</p>
+                                                <p class="text-xs text-slate-500">{{ $employee->email }}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-slate-700">College of Computing</td>
-                                <td class="px-4 py-4 text-slate-700">Associate Professor</td>
-                                <td class="px-4 py-4"><span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">Active</span></td>
-                                <td class="px-4 py-4"><span class="rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">Updated</span></td>
-                                <td class="px-4 py-4 text-slate-600">
-                                    <details class="relative inline-block">
-                                        <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none hover:bg-slate-100">...</summary>
-                                        <div class="absolute right-0 z-20 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
-                                            <a href="#" data-open-modal="employee-details-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Details</a>
-                                            <a href="#" data-open-modal="employee-edit-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">Edit</a>
-                                            <a href="{{ route('employees.profile') }}" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Profile</a>
-                                            <a href="#" class="block rounded-lg border border-red-300 px-3 py-2 text-center font-semibold text-red-600 hover:bg-red-50">Delete</a>
-                                        </div>
-                                    </details>
-                                </td>
-                            </tr>
-
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-5 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#00386f] text-xs font-semibold text-white">JD</span>
-                                        <div>
-                                            <p class="font-semibold text-slate-800">Juan Dela Cruz</p>
-                                            <p class="text-xs text-slate-500">juan.delacruz@nu.edu.ph</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-slate-700">College of Engineering</td>
-                                <td class="px-4 py-4 text-slate-700">Professor</td>
-                                <td class="px-4 py-4"><span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">Active</span></td>
-                                <td class="px-4 py-4"><span class="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">Needs Update</span></td>
-                                <td class="px-4 py-4 text-slate-600">
-                                    <details class="relative inline-block">
-                                        <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none hover:bg-slate-100">...</summary>
-                                        <div class="absolute right-0 z-20 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
-                                            <a href="#" data-open-modal="employee-details-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Details</a>
-                                            <a href="#" data-open-modal="employee-edit-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">Edit</a>
-                                            <a href="{{ route('employees.profile') }}" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Profile</a>
-                                            <a href="#" class="block rounded-lg border border-red-300 px-3 py-2 text-center font-semibold text-red-600 hover:bg-red-50">Delete</a>
-                                        </div>
-                                    </details>
-                                </td>
-                            </tr>
-
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-5 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#00386f] text-xs font-semibold text-white">AR</span>
-                                        <div>
-                                            <p class="font-semibold text-slate-800">Ana Reyes</p>
-                                            <p class="text-xs text-slate-500">ana.reyes@nu.edu.ph</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-slate-700">College of Business</td>
-                                <td class="px-4 py-4 text-slate-700">Instructor</td>
-                                <td class="px-4 py-4"><span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">Active</span></td>
-                                <td class="px-4 py-4"><span class="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">Needs Update</span></td>
-                                <td class="px-4 py-4 text-slate-600">
-                                    <details class="relative inline-block">
-                                        <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none hover:bg-slate-100">...</summary>
-                                        <div class="absolute right-0 z-20 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
-                                            <a href="#" data-open-modal="employee-details-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Details</a>
-                                            <a href="#" data-open-modal="employee-edit-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">Edit</a>
-                                            <a href="{{ route('employees.profile') }}" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Profile</a>
-                                            <a href="#" class="block rounded-lg border border-red-300 px-3 py-2 text-center font-semibold text-red-600 hover:bg-red-50">Delete</a>
-                                        </div>
-                                    </details>
-                                </td>
-                            </tr>
-
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-5 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#00386f] text-xs font-semibold text-white">CG</span>
-                                        <div>
-                                            <p class="font-semibold text-slate-800">Carlos Garcia</p>
-                                            <p class="text-xs text-slate-500">carlos.garcia@nu.edu.ph</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-slate-700">College of Education</td>
-                                <td class="px-4 py-4 text-slate-700">Assistant Professor</td>
-                                <td class="px-4 py-4"><span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">Active</span></td>
-                                <td class="px-4 py-4"><span class="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">Needs Update</span></td>
-                                <td class="px-4 py-4 text-slate-600">
-                                    <details class="relative inline-block">
-                                        <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none hover:bg-slate-100">...</summary>
-                                        <div class="absolute right-0 z-20 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
-                                            <a href="#" data-open-modal="employee-details-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Details</a>
-                                            <a href="#" data-open-modal="employee-edit-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">Edit</a>
-                                            <a href="{{ route('employees.profile') }}" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Profile</a>
-                                            <a href="#" class="block rounded-lg border border-red-300 px-3 py-2 text-center font-semibold text-red-600 hover:bg-red-50">Delete</a>
-                                        </div>
-                                    </details>
-                                </td>
-                            </tr>
-
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-5 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#00386f] text-xs font-semibold text-white">LM</span>
-                                        <div>
-                                            <p class="font-semibold text-slate-800">Lisa Mendoza</p>
-                                            <p class="text-xs text-slate-500">lisa.mendoza@nu.edu.ph</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-slate-700">Human Resources</td>
-                                <td class="px-4 py-4 text-slate-700">HR Specialist</td>
-                                <td class="px-4 py-4"><span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">Active</span></td>
-                                <td class="px-4 py-4"><span class="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">Needs Update</span></td>
-                                <td class="px-4 py-4 text-slate-600">
-                                    <details class="relative inline-block">
-                                        <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none hover:bg-slate-100">...</summary>
-                                        <div class="absolute right-0 z-20 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
-                                            <a href="#" data-open-modal="employee-details-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Details</a>
-                                            <a href="#" data-open-modal="employee-edit-modal" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">Edit</a>
-                                            <a href="{{ route('employees.profile') }}" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Profile</a>
-                                            <a href="#" class="block rounded-lg border border-red-300 px-3 py-2 text-center font-semibold text-red-600 hover:bg-red-50">Delete</a>
-                                        </div>
-                                    </details>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td class="px-4 py-4 text-slate-700">{{ $employee->department?->name }}</td>
+                                    <td class="px-4 py-4 text-slate-700">{{ $employee->position }}</td>
+                                    <td class="px-4 py-4">
+                                        <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
+                                            {{ str_replace('_', ' ', ucfirst($employee->status)) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4">
+                                        @if ($employee->resume_last_updated_at)
+                                            <span class="rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">Updated</span>
+                                        @else
+                                            <span class="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">Needs Update</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-4 text-slate-600">
+                                        <details class="relative inline-block">
+                                            <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none hover:bg-slate-100">...</summary>
+                                            <div class="absolute right-0 z-20 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+                                                <a href="#"
+                                                    data-open-modal="employee-details-modal"
+                                                    data-employee-id="{{ $employee->id }}"
+                                                    data-employee-employee-id="{{ $employee->employee_id }}"
+                                                    data-employee-first-name="{{ $employee->first_name }}"
+                                                    data-employee-last-name="{{ $employee->last_name }}"
+                                                    data-employee-full-name="{{ $employee->full_name }}"
+                                                    data-employee-email="{{ $employee->email }}"
+                                                    data-employee-phone="{{ $employee->phone }}"
+                                                    data-employee-department-id="{{ $employee->department_id }}"
+                                                    data-employee-department-name="{{ $employee->department?->name }}"
+                                                    data-employee-position="{{ $employee->position }}"
+                                                    data-employee-employment-type="{{ $employee->employment_type }}"
+                                                    data-employee-ranking="{{ $employee->ranking }}"
+                                                    data-employee-status="{{ $employee->status }}"
+                                                    data-employee-hire-date="{{ $employee->hire_date?->format('Y-m-d') }}"
+                                                    data-employee-official-time-in="{{ $employee->official_time_in?->format('H:i') }}"
+                                                    data-employee-official-time-out="{{ $employee->official_time_out?->format('H:i') }}"
+                                                    data-employee-resume-last-updated="{{ $employee->resume_last_updated_at?->format('Y-m-d') }}"
+                                                    class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Details</a>
+                                                <a href="#"
+                                                    data-open-modal="employee-edit-modal"
+                                                    data-employee-id="{{ $employee->id }}"
+                                                    data-employee-employee-id="{{ $employee->employee_id }}"
+                                                    data-employee-first-name="{{ $employee->first_name }}"
+                                                    data-employee-last-name="{{ $employee->last_name }}"
+                                                    data-employee-full-name="{{ $employee->full_name }}"
+                                                    data-employee-email="{{ $employee->email }}"
+                                                    data-employee-phone="{{ $employee->phone }}"
+                                                    data-employee-department-id="{{ $employee->department_id }}"
+                                                    data-employee-department-name="{{ $employee->department?->name }}"
+                                                    data-employee-position="{{ $employee->position }}"
+                                                    data-employee-employment-type="{{ $employee->employment_type }}"
+                                                    data-employee-ranking="{{ $employee->ranking }}"
+                                                    data-employee-status="{{ $employee->status }}"
+                                                    data-employee-hire-date="{{ $employee->hire_date?->format('Y-m-d') }}"
+                                                    data-employee-official-time-in="{{ $employee->official_time_in?->format('H:i') }}"
+                                                    data-employee-official-time-out="{{ $employee->official_time_out?->format('H:i') }}"
+                                                    data-employee-resume-last-updated="{{ $employee->resume_last_updated_at?->format('Y-m-d') }}"
+                                                    class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">Edit</a>
+                                                <a href="{{ route('employees.profile') }}" class="mb-1 block rounded-lg border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800 hover:bg-slate-50">View Profile</a>
+                                                <form method="POST" action="{{ route('employees.destroy', $employee) }}" onsubmit="return confirm('Delete this employee?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="block w-full rounded-lg border border-red-300 px-3 py-2 text-center font-semibold text-red-600 hover:bg-red-50">Delete</button>
+                                                </form>
+                                            </div>
+                                        </details>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-5 py-6 text-center text-sm text-slate-500">No employee records found.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </article>
+
+                <div>
+                    {{ $employees->links() }}
+                </div>
 
                 <div class="h-8"></div>
             </section>
@@ -268,48 +230,44 @@
                 <button type="button" data-close-modal class="text-5xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <form class="grid grid-cols-1 gap-4 px-8 pb-8 md:grid-cols-2">
+            <form method="POST" action="{{ route('employees.store') }}" class="grid grid-cols-1 gap-4 px-8 pb-8 md:grid-cols-2">
+                @csrf
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Employee ID</label>
-                    <input type="text" placeholder="EMP-001" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="employee_id" type="text" placeholder="EMP-001" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Email *</label>
-                    <input type="email" placeholder="email@nu.edu.ph" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="email" type="email" placeholder="email@nu.edu.ph" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">First Name *</label>
-                    <input type="text" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="first_name" type="text" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Last Name *</label>
-                    <input type="text" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="last_name" type="text" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Phone</label>
-                    <input type="text" placeholder="+63 XXX XXX XXXX" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="phone" type="text" placeholder="+63 XXX XXX XXXX" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Department *</label>
-                    <select class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500">
-                        <option>Select Department</option>
-                        <option>College of Engineering</option>
-                        <option>College of Business</option>
-                        <option>College of Education</option>
-                        <option>College of Arts &amp; Sciences</option>
-                        <option>College of Computing</option>
-                        <option>College of Allied Health</option>
-                        <option>Administration</option>
-                        <option>Human Resources</option>
+                    <select name="department_id" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500" required>
+                        <option value="">Select Department</option>
+                        @foreach ($departments as $department)
+                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Position *</label>
-                    <input type="text" placeholder="e.g. Associate Professor" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="position" type="text" placeholder="e.g. Associate Professor" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Employment Type</label>
-                    <select class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500">
+                    <select name="employment_type" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500">
                         <option>Select type</option>
                         <option>Full-time Faculty</option>
                         <option>Part-time Faculty</option>
@@ -318,7 +276,7 @@
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Ranking</label>
-                    <select class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <select name="ranking" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                         <option>N/A</option>
                         <option>Instructor I</option>
                         <option>Instructor II</option>
@@ -329,28 +287,28 @@
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Status</label>
-                    <select class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
-                        <option>Active</option>
-                        <option>On Leave</option>
-                        <option>Resigned</option>
-                        <option>Terminated</option>
+                    <select name="status" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                        <option value="active">Active</option>
+                        <option value="on_leave">On Leave</option>
+                        <option value="resigned">Resigned</option>
+                        <option value="terminated">Terminated</option>
                     </select>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Hire Date</label>
-                    <input type="text" placeholder="mm/dd/yyyy" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="hire_date" type="date" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Official Time In</label>
-                    <input type="text" value="8:30 AM" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="official_time_in" type="time" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Official Time Out</label>
-                    <input type="text" value="5:30 PM" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="official_time_out" type="time" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Resume Last Updated</label>
-                    <input type="text" placeholder="mm/dd/yyyy" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input name="resume_last_updated_at" type="date" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
 
                 <div class="md:col-span-2 mt-2 flex justify-end gap-3">
@@ -371,45 +329,45 @@
             </div>
             <div class="border-b border-slate-300 px-6 py-5">
                 <div class="flex items-center gap-4">
-                    <span class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#00386f] text-2xl text-white">MS</span>
+                    <span id="details-initials" class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#00386f] text-2xl text-white">MS</span>
                     <div>
-                        <p class="text-4xl font-bold text-[#1f2b8b]">Maria Santos</p>
-                        <p class="text-2xl text-slate-600">Associate Professor</p>
+                        <p id="details-full-name" class="text-4xl font-bold text-[#1f2b8b]">Maria Santos</p>
+                        <p id="details-position" class="text-2xl text-slate-600">Associate Professor</p>
                     </div>
                 </div>
             </div>
             <div class="grid grid-cols-1 gap-5 px-6 py-6 text-slate-800 md:grid-cols-2">
                 <div>
                     <p class="text-base text-slate-500">Employee ID</p>
-                    <p class="text-2xl">NU-2021-001</p>
+                    <p id="details-employee-id" class="text-2xl">NU-2021-001</p>
                 </div>
                 <div>
                     <p class="text-base text-slate-500">Department</p>
-                    <p class="text-2xl">College of Computing</p>
+                    <p id="details-department" class="text-2xl">College of Computing</p>
                 </div>
                 <div>
                     <p class="text-base text-slate-500">Email</p>
-                    <p class="text-2xl">maria.santos@nu.edu.ph</p>
+                    <p id="details-email" class="text-2xl">maria.santos@nu.edu.ph</p>
                 </div>
                 <div>
                     <p class="text-base text-slate-500">Phone</p>
-                    <p class="text-2xl">+63 917 123 4567</p>
+                    <p id="details-phone" class="text-2xl">+63 917 123 4567</p>
                 </div>
                 <div>
                     <p class="text-base text-slate-500">Employment Type</p>
-                    <p class="text-2xl">Full-time Faculty</p>
+                    <p id="details-employment-type" class="text-2xl">Full-time Faculty</p>
                 </div>
                 <div>
                     <p class="text-base text-slate-500">Ranking</p>
-                    <p class="text-2xl">Associate Professor II</p>
+                    <p id="details-ranking" class="text-2xl">Associate Professor II</p>
                 </div>
                 <div>
                     <p class="text-base text-slate-500">Hire Date</p>
-                    <p class="text-2xl">Jun 15, 2021</p>
+                    <p id="details-hire-date" class="text-2xl">Jun 15, 2021</p>
                 </div>
                 <div>
                     <p class="text-base text-slate-500">Official Time</p>
-                    <p class="text-2xl">08:30 - 17:30</p>
+                    <p id="details-official-time" class="text-2xl">08:30 - 17:30</p>
                 </div>
             </div>
         </div>
@@ -425,62 +383,73 @@
                 <button type="button" data-close-modal class="text-5xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <form class="grid grid-cols-1 gap-4 px-8 pb-8 md:grid-cols-2">
+            <form id="employee-edit-form" method="POST" class="grid grid-cols-1 gap-4 px-8 pb-8 md:grid-cols-2">
+                @csrf
+                @method('PUT')
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Employee ID</label>
-                    <input type="text" value="NU-2021-001" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-employee-id" name="employee_id" type="text" value="NU-2021-001" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Email *</label>
-                    <input type="email" value="maria.santos@nu.edu.ph" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-email" name="email" type="email" value="maria.santos@nu.edu.ph" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">First Name *</label>
-                    <input type="text" value="Maria" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-first-name" name="first_name" type="text" value="Maria" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Last Name *</label>
-                    <input type="text" value="Santos" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-last-name" name="last_name" type="text" value="Santos" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Phone</label>
-                    <input type="text" value="+63 917 123 4567" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-phone" name="phone" type="text" value="+63 917 123 4567" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Department *</label>
-                    <input type="text" value="College of Computing" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <select id="edit-department-id" name="department_id" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500" required>
+                        @foreach ($departments as $department)
+                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Position *</label>
-                    <input type="text" value="Associate Professor" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-position" name="position" type="text" value="Associate Professor" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Employment Type</label>
-                    <input type="text" value="Full-time Faculty" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-employment-type" name="employment_type" type="text" value="Full-time Faculty" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Ranking</label>
-                    <input type="text" value="Associate Professor II" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-ranking" name="ranking" type="text" value="Associate Professor II" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Status</label>
-                    <input type="text" value="Active" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <select id="edit-status" name="status" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                        <option value="active">Active</option>
+                        <option value="on_leave">On Leave</option>
+                        <option value="resigned">Resigned</option>
+                        <option value="terminated">Terminated</option>
+                    </select>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Hire Date</label>
-                    <input type="text" value="06/15/2021" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-hire-date" name="hire_date" type="date" value="2021-06-15" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Official Time In</label>
-                    <input type="text" value="8:30 AM" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-official-time-in" name="official_time_in" type="time" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Official Time Out</label>
-                    <input type="text" value="5:30 PM" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-official-time-out" name="official_time_out" type="time" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Resume Last Updated</label>
-                    <input type="text" value="02/01/2026" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                    <input id="edit-resume-last-updated" name="resume_last_updated_at" type="date" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
 
                 <div class="md:col-span-2 mt-2 flex justify-end gap-3">
@@ -496,6 +465,97 @@
         const closers = document.querySelectorAll('[data-close-modal]');
         const modals = document.querySelectorAll('.modal-overlay');
 
+        const employeeEditForm = document.getElementById('employee-edit-form');
+        const detailsInitials = document.getElementById('details-initials');
+        const detailsFullName = document.getElementById('details-full-name');
+        const detailsPosition = document.getElementById('details-position');
+        const detailsEmployeeId = document.getElementById('details-employee-id');
+        const detailsDepartment = document.getElementById('details-department');
+        const detailsEmail = document.getElementById('details-email');
+        const detailsPhone = document.getElementById('details-phone');
+        const detailsEmploymentType = document.getElementById('details-employment-type');
+        const detailsRanking = document.getElementById('details-ranking');
+        const detailsHireDate = document.getElementById('details-hire-date');
+        const detailsOfficialTime = document.getElementById('details-official-time');
+
+        const editEmployeeId = document.getElementById('edit-employee-id');
+        const editEmail = document.getElementById('edit-email');
+        const editFirstName = document.getElementById('edit-first-name');
+        const editLastName = document.getElementById('edit-last-name');
+        const editPhone = document.getElementById('edit-phone');
+        const editDepartmentId = document.getElementById('edit-department-id');
+        const editPosition = document.getElementById('edit-position');
+        const editEmploymentType = document.getElementById('edit-employment-type');
+        const editRanking = document.getElementById('edit-ranking');
+        const editStatus = document.getElementById('edit-status');
+        const editHireDate = document.getElementById('edit-hire-date');
+        const editOfficialTimeIn = document.getElementById('edit-official-time-in');
+        const editOfficialTimeOut = document.getElementById('edit-official-time-out');
+        const editResumeLastUpdated = document.getElementById('edit-resume-last-updated');
+
+        function formatDateForDetails(dateValue) {
+            if (!dateValue) return 'N/A';
+            const date = new Date(dateValue);
+            if (Number.isNaN(date.getTime())) return 'N/A';
+            return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+        }
+
+        function populateEmployeeModals(trigger) {
+            const employeeId = trigger.dataset.employeeId || '';
+            const employeeCode = trigger.dataset.employeeEmployeeId || '';
+            const fullName = trigger.dataset.employeeFullName || '';
+            const firstName = trigger.dataset.employeeFirstName || '';
+            const lastName = trigger.dataset.employeeLastName || '';
+            const email = trigger.dataset.employeeEmail || '';
+            const phone = trigger.dataset.employeePhone || 'N/A';
+            const departmentName = trigger.dataset.employeeDepartmentName || 'N/A';
+            const departmentId = trigger.dataset.employeeDepartmentId || '';
+            const position = trigger.dataset.employeePosition || '';
+            const employmentType = trigger.dataset.employeeEmploymentType || 'N/A';
+            const ranking = trigger.dataset.employeeRanking || 'N/A';
+            const status = trigger.dataset.employeeStatus || 'active';
+            const hireDate = trigger.dataset.employeeHireDate || '';
+            const officialTimeIn = trigger.dataset.employeeOfficialTimeIn || '';
+            const officialTimeOut = trigger.dataset.employeeOfficialTimeOut || '';
+            const resumeLastUpdated = trigger.dataset.employeeResumeLastUpdated || '';
+
+            const initials = `${(firstName[0] || '').toUpperCase()}${(lastName[0] || '').toUpperCase()}`;
+
+            if (detailsInitials) detailsInitials.textContent = initials || 'NA';
+            if (detailsFullName) detailsFullName.textContent = fullName || 'N/A';
+            if (detailsPosition) detailsPosition.textContent = position || 'N/A';
+            if (detailsEmployeeId) detailsEmployeeId.textContent = employeeCode || 'N/A';
+            if (detailsDepartment) detailsDepartment.textContent = departmentName;
+            if (detailsEmail) detailsEmail.textContent = email || 'N/A';
+            if (detailsPhone) detailsPhone.textContent = phone || 'N/A';
+            if (detailsEmploymentType) detailsEmploymentType.textContent = employmentType || 'N/A';
+            if (detailsRanking) detailsRanking.textContent = ranking || 'N/A';
+            if (detailsHireDate) detailsHireDate.textContent = formatDateForDetails(hireDate);
+            if (detailsOfficialTime) {
+                detailsOfficialTime.textContent = officialTimeIn && officialTimeOut
+                    ? `${officialTimeIn} - ${officialTimeOut}`
+                    : 'N/A';
+            }
+
+            if (employeeEditForm && employeeId) {
+                employeeEditForm.action = `/hr/employees/${employeeId}`;
+            }
+            if (editEmployeeId) editEmployeeId.value = employeeCode;
+            if (editEmail) editEmail.value = email;
+            if (editFirstName) editFirstName.value = firstName;
+            if (editLastName) editLastName.value = lastName;
+            if (editPhone) editPhone.value = phone === 'N/A' ? '' : phone;
+            if (editDepartmentId) editDepartmentId.value = departmentId;
+            if (editPosition) editPosition.value = position;
+            if (editEmploymentType) editEmploymentType.value = employmentType === 'N/A' ? '' : employmentType;
+            if (editRanking) editRanking.value = ranking === 'N/A' ? '' : ranking;
+            if (editStatus) editStatus.value = status;
+            if (editHireDate) editHireDate.value = hireDate;
+            if (editOfficialTimeIn) editOfficialTimeIn.value = officialTimeIn;
+            if (editOfficialTimeOut) editOfficialTimeOut.value = officialTimeOut;
+            if (editResumeLastUpdated) editResumeLastUpdated.value = resumeLastUpdated;
+        }
+
         function closeAllModals() {
             modals.forEach((modal) => {
                 modal.classList.add('hidden');
@@ -510,6 +570,10 @@
                 const modalId = trigger.getAttribute('data-open-modal');
                 const modal = document.getElementById(modalId);
                 if (!modal) return;
+
+                if (trigger.dataset.employeeId) {
+                    populateEmployeeModals(trigger);
+                }
 
                 closeAllModals();
                 modal.classList.remove('hidden');

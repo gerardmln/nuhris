@@ -19,7 +19,7 @@
 
     <div id="rbac-role-view" class="space-y-3">
         <div class="flex flex-wrap gap-2">
-            @foreach (['Admin', 'HR Personnel', 'Faculty', 'ASP', 'Security'] as $role)
+            @foreach ($roles as $role)
                 <button class="rbac-role-btn rounded border border-slate-300 px-4 py-1 text-sm font-semibold {{ $role === 'Admin' ? 'bg-[#083b72] text-white' : 'bg-white text-[#24358a]' }}" data-role="{{ $role }}">{{ $role }}</button>
             @endforeach
         </div>
@@ -29,11 +29,11 @@
             <p class="text-sm text-slate-500">Configure role-based access control permissions for each module</p>
 
             <div class="mt-4 space-y-2">
-                @foreach (['User Management', 'Role Management', 'Employee Records', 'Leave Management', 'Compliance Tracking', 'DTR / Timekeeping', 'Reports', 'System Settings', 'Audit Logs'] as $module)
+                @foreach ($modules as $module)
                     <div class="rounded-lg bg-[#e9f1ff] px-4 py-3">
                         <p class="font-semibold text-[#24358a]">{{ $module }}</p>
                         <div class="mt-2 flex flex-wrap gap-3 text-xs">
-                            @foreach (['View', 'Create', 'Edit', 'Approve', 'Delete'] as $perm)
+                            @foreach ($permissions as $perm)
                                 <label class="inline-flex items-center gap-1">
                                     <input type="checkbox" checked>
                                     <span>{{ $perm }}</span>
@@ -62,8 +62,8 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200">
-                    @foreach (['User Management', 'Role Management', 'Employee Records', 'Leave Management', 'Compliance Tracking', 'DTR / Timekeeping', 'Reports', 'System Settings', 'Audit Logs'] as $module)
-                        @foreach (['View', 'Create', 'Edit', 'Approve', 'Delete'] as $perm)
+                    @foreach ($modules as $module)
+                        @foreach ($permissions as $perm)
                             <tr>
                                 <td class="px-3 py-2">{{ $module }}</td>
                                 <td class="px-3 py-2">{{ $perm }}</td>

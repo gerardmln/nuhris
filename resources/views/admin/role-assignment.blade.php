@@ -6,16 +6,10 @@
 
 @section('content')
     <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
-        @foreach ([
-            ['Administrator', 'Full system access'],
-            ['HR Personnel', 'HR records and compliance'],
-            ['Faculty', 'Own records and leave'],
-            ['ASP', 'Own records and leave'],
-            ['Security', 'Own records and DTR'],
-        ] as $role)
+        @foreach ($roles as $role)
             <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
-                <p class="font-semibold text-[#24358a]">{{ $role[0] }}</p>
-                <p class="text-xs text-slate-500">{{ $role[1] }}</p>
+                <p class="font-semibold text-[#24358a]">{{ $role['name'] }}</p>
+                <p class="text-xs text-slate-500">{{ $role['description'] }}</p>
             </article>
         @endforeach
     </div>
@@ -25,18 +19,18 @@
         <input type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm md:w-80" placeholder="Search for user by name or email...">
 
         <div class="space-y-2">
-            @foreach ([['MS', 'Maria Santos', 'maria.santos@nu.edu.ph', 'Faculty'], ['JD', 'Juan Dela Cruz', 'juan.delacruz@nu.edu.ph', 'Faculty'], ['AR', 'Ana Reyes', 'ana.reyes@nu.edu.ph', 'Faculty'], ['CG', 'Carlos Garcia', 'carlos.garcia@nu.edu.ph', 'Faculty'], ['LM', 'Lisa Mendoza', 'lisa.mendoza@nu.edu.ph', 'HR Personnel']] as $u)
+            @foreach ($assignableUsers as $u)
                 <div class="flex items-center justify-between rounded-xl bg-[#cfe1f5] px-4 py-3">
                     <div class="flex items-center gap-3">
-                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#083b72] text-xs font-semibold text-white">{{ $u[0] }}</span>
+                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#083b72] text-xs font-semibold text-white">{{ $u['initials'] }}</span>
                         <div>
-                            <p class="font-semibold text-[#24358a]">{{ $u[1] }}</p>
-                            <p class="text-xs text-slate-500">{{ $u[2] }}</p>
+                            <p class="font-semibold text-[#24358a]">{{ $u['name'] }}</p>
+                            <p class="text-xs text-slate-500">{{ $u['email'] }}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">{{ $u[3] }}</span>
-                        <button class="assign-role-btn rounded-lg border border-blue-300 bg-white px-3 py-1 text-xs font-semibold text-blue-700" data-user="{{ $u[1] }}">Change Role</button>
+                        <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">{{ $u['role'] }}</span>
+                        <button class="assign-role-btn rounded-lg border border-blue-300 bg-white px-3 py-1 text-xs font-semibold text-blue-700" data-user="{{ $u['name'] }}">Change Role</button>
                     </div>
                 </div>
             @endforeach
@@ -54,7 +48,7 @@
             </div>
 
             <div class="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                @foreach (['Administrator', 'HR Personnel', 'Faculty', 'ASP', 'Security'] as $r)
+                @foreach ($roleOptions as $r)
                     <label class="flex cursor-pointer items-start gap-3">
                         <input type="radio" name="assign_role" value="{{ $r }}" class="mt-1" @checked($r === 'Faculty')>
                         <span>

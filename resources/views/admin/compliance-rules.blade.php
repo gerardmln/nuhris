@@ -5,10 +5,10 @@
 
 @section('content')
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">CHED Compliance</p><p class="text-4xl font-extrabold">94%</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">PRC Valid</p><p class="text-4xl font-extrabold">237/245</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Expiring Soon</p><p class="text-4xl font-extrabold">8</p></article>
-        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Pending Documents</p><p class="text-4xl font-extrabold">12</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">CHED Compliance</p><p class="text-4xl font-extrabold">{{ $stats['ched_compliance'] }}%</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">PRC Valid</p><p class="text-4xl font-extrabold">{{ $stats['prc_valid'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Expiring Soon</p><p class="text-4xl font-extrabold">{{ $stats['expiring_soon'] }}</p></article>
+        <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm"><p class="text-xs text-slate-500">Pending Documents</p><p class="text-4xl font-extrabold">{{ $stats['pending_documents'] }}</p></article>
     </div>
 
     <div class="inline-flex rounded-lg bg-slate-300 p-1 text-xs font-semibold">
@@ -20,7 +20,7 @@
     <article id="compliance-ched" class="compliance-panel rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
         <h3 class="text-2xl font-bold">CHED Compliance Checklist</h3>
         <div class="mt-3 space-y-2">
-            @foreach (['Faculty Qualifications Report', 'Faculty Loading Report', 'Research Output Documentation', 'Faculty Development Program Report', 'Student-Faculty Ratio Report', 'Curriculum Vitae Updates'] as $item)
+            @foreach ($chedItems as $item)
                 <div class="flex items-center justify-between rounded-lg bg-[#cfe1f5] px-4 py-3">
                     <p class="font-semibold">{{ $item }}</p>
                     <span class="text-xs text-slate-500">compliant</span>
@@ -32,7 +32,7 @@
     <article id="compliance-prc" class="compliance-panel hidden rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
         <h3 class="text-2xl font-bold">PRC License Validation Rules</h3>
         <div class="mt-3 space-y-2">
-            @foreach (['License Number Verification', 'Expiration Date Check', 'Renewal Reminder', 'Auto-suspend Access', 'Document Upload Required'] as $item)
+            @foreach ($prcRules as $item)
                 <div class="flex items-center justify-between rounded-lg bg-[#cfe1f5] px-4 py-3">
                     <p class="font-semibold">{{ $item }}</p>
                     <span class="text-xs text-slate-500">edit</span>
@@ -47,7 +47,7 @@
             <button id="open-rule-modal" class="rounded-lg bg-[#242b34] px-4 py-2 text-xs font-semibold text-white">+ Add Rule</button>
         </div>
         <div class="space-y-2">
-            @foreach (['PRC Expiration', 'Phone Number', 'PRC License Format', 'Employee ID', 'Date of Birth', 'Salary Range'] as $rule)
+            @foreach ($alertRules as $rule)
                 <div class="flex items-center justify-between rounded-lg bg-[#cfe1f5] px-4 py-3">
                     <p class="font-semibold">{{ $rule }}</p>
                     <span class="text-xs text-slate-500">on</span>

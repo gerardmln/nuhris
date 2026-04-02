@@ -9,23 +9,23 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
             <p class="text-sm font-semibold text-slate-700">Tardiness</p>
-            <p class="mt-2 text-5xl font-extrabold">0m</p>
+            <p class="mt-2 text-5xl font-extrabold">{{ $totals['tardiness'] }}m</p>
         </article>
         <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
             <p class="text-sm font-semibold text-slate-700">Undertime</p>
-            <p class="mt-2 text-5xl font-extrabold">0m</p>
+            <p class="mt-2 text-5xl font-extrabold">{{ $totals['undertime'] }}m</p>
         </article>
         <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
             <p class="text-sm font-semibold text-slate-700">Overtime</p>
-            <p class="mt-2 text-5xl font-extrabold">0m</p>
+            <p class="mt-2 text-5xl font-extrabold">{{ $totals['overtime'] }}m</p>
         </article>
         <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
             <p class="text-sm font-semibold text-slate-700">Absences</p>
-            <p class="mt-2 text-5xl font-extrabold">0</p>
+            <p class="mt-2 text-5xl font-extrabold">{{ $totals['absences'] }}</p>
         </article>
         <article class="rounded-2xl border border-slate-300 bg-white p-4 shadow-sm">
             <p class="text-sm font-semibold text-slate-700">Workload Credits</p>
-            <p class="mt-2 text-5xl font-extrabold">0</p>
+            <p class="mt-2 text-5xl font-extrabold">{{ $totals['workload_credits'] }}</p>
         </article>
     </div>
 
@@ -35,8 +35,9 @@
         <div class="mt-4 max-w-md">
             <select class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                 <option>All Records</option>
-                <option>January 2026</option>
-                <option>February 2026</option>
+                @foreach ($periods as $period)
+                    <option>{{ $period }}</option>
+                @endforeach
             </select>
         </div>
 
@@ -55,9 +56,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="8" class="py-24 text-center text-2xl text-slate-400">No attendance records found</td>
-                    </tr>
+                    @forelse ($records as $record)
+                        <tr>
+                            <td class="px-4 py-2">{{ $record['date'] }}</td>
+                            <td class="px-4 py-2">{{ $record['time_in'] ?? '-' }}</td>
+                            <td class="px-4 py-2">{{ $record['time_out'] ?? '-' }}</td>
+                            <td class="px-4 py-2">{{ $record['scheduled'] }}</td>
+                            <td class="px-4 py-2">{{ $record['tardiness_minutes'] }}m</td>
+                            <td class="px-4 py-2">{{ $record['undertime_minutes'] }}m</td>
+                            <td class="px-4 py-2">{{ $record['overtime_minutes'] }}m</td>
+                            <td class="px-4 py-2">{{ $record['status'] }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="py-24 text-center text-2xl text-slate-400">No attendance records found</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
