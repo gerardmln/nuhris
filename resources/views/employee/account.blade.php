@@ -4,6 +4,10 @@
 @section('page_title', 'Account')
 
 @section('content')
+    @if (session('success'))
+        <div class="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>
+    @endif
+
     <article class="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
         <div class="h-20 bg-[#003a78]"></div>
         <div class="flex flex-wrap items-end gap-4 px-6 pb-6">
@@ -18,12 +22,14 @@
     <article class="rounded-2xl border border-slate-300 bg-white p-6 shadow-sm">
         <h2 class="text-3xl font-bold text-slate-900">Profile Information</h2>
 
-        <form class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3" method="POST" action="javascript:void(0)">
+        <form class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3" method="POST" action="{{ route('employee.account.update') }}">
             @csrf
+
+            <input type="hidden" name="name" value="{{ auth()->user()->name }}">
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Employee Type</label>
-                <select class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <select name="employee_type" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option value="">Select type</option>
                     @foreach ($employeeTypes as $type)
                         <option value="{{ $type }}" @selected($employee && str_contains(strtolower($employee->employment_type ?? ''), strtolower($type)))>{{ $type }}</option>
@@ -33,32 +39,37 @@
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Employee ID</label>
-                <input type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $employee->employee_id ?? '' }}" placeholder="e.g., NU-2025-001">
+                <input name="employee_id" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $employee->employee_id ?? '' }}" placeholder="e.g., NU-2025-001">
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Department</label>
-                <input type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $employee->department->name ?? '' }}" placeholder="e.g., SACE">
+                <select name="department_id" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">Select department</option>
+                    @foreach ($departments as $department)
+                        <option value="{{ $department->id }}" @selected(($employee->department_id ?? null) === $department->id)>{{ $department->name }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Phone</label>
-                <input type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $employee->phone ?? '' }}" placeholder="e.g., 09171234567">
+                <input name="phone" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $employee->phone ?? '' }}" placeholder="e.g., 09171234567">
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Position</label>
-                <input type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $employee->position ?? '' }}" placeholder="e.g., Instructor I">
+                <input name="position" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $employee->position ?? '' }}" placeholder="e.g., Instructor I">
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Date Hired</label>
-                <input type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ optional($employee?->hire_date)->format('Y-m-d') }}">
+                <input name="hire_date" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ optional($employee?->hire_date)->format('Y-m-d') }}">
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Address</label>
-                <input type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Home address">
+                <input name="address" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $employee->address ?? '' }}" placeholder="Home address">
             </div>
 
             <div class="lg:col-span-3">

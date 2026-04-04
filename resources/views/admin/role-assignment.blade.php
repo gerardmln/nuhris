@@ -30,7 +30,14 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">{{ $u['role'] }}</span>
-                        <button class="assign-role-btn rounded-lg border border-blue-300 bg-white px-3 py-1 text-xs font-semibold text-blue-700" data-user="{{ $u['name'] }}">Change Role</button>
+                        <button
+                            class="assign-role-btn rounded-lg border border-blue-300 bg-white px-3 py-1 text-xs font-semibold text-blue-700"
+                            data-user="{{ $u['name'] }}"
+                            data-user-id="{{ $u['user_id'] }}"
+                            data-user-type="{{ $u['user_type'] }}"
+                        >
+                            Change Role
+                        </button>
                     </div>
                 </div>
             @endforeach
@@ -47,26 +54,30 @@
                 <button id="close-role-modal" class="text-2xl">x</button>
             </div>
 
-            <div class="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                @foreach ($roleOptions as $r)
-                    <label class="flex cursor-pointer items-start gap-3">
-                        <input type="radio" name="assign_role" value="{{ $r }}" class="mt-1" @checked($r === 'Faculty')>
-                        <span>
-                            <span class="block font-semibold">{{ $r }}</span>
-                            <span class="block text-sm text-slate-500">Role access configuration for {{ $r }}.</span>
-                        </span>
-                    </label>
-                @endforeach
-            </div>
+            <form method="POST" action="{{ route('admin.users.role-assignment.update') }}">
+                @csrf
+                <input id="role-user-id" type="hidden" name="user_id" value="">
+                <div class="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    @foreach ($roleOptions as $r)
+                        <label class="flex cursor-pointer items-start gap-3">
+                            <input type="radio" name="user_type" value="{{ $roleOptionMap[$r] }}" class="mt-1">
+                            <span>
+                                <span class="block font-semibold">{{ $r }}</span>
+                                <span class="block text-sm text-slate-500">Role access configuration for {{ $r }}.</span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
 
-            <div class="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
-                Changing a user's role will update permissions. The user may need to log out and log back in.
-            </div>
+                <div class="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+                    Changing a user's role will update permissions. The user may need to log out and log back in.
+                </div>
 
-            <div class="mt-4 flex justify-end gap-2">
-                <button id="cancel-role-modal" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Cancel</button>
-                <button id="save-role-modal" class="rounded-lg bg-[#083b72] px-4 py-2 text-sm font-semibold text-white">Save Changes</button>
-            </div>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button id="cancel-role-modal" type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Cancel</button>
+                    <button id="save-role-modal" type="submit" class="rounded-lg bg-[#083b72] px-4 py-2 text-sm font-semibold text-white">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -85,6 +96,13 @@
             document.querySelectorAll('.assign-role-btn').forEach((button) => {
                 button.addEventListener('click', () => {
                     modalUser.textContent = button.dataset.user;
+                    document.getElementById('role-user-id').value = button.dataset.userId;
+
+                    const currentUserType = button.dataset.userType;
+                    document.querySelectorAll('input[name="user_type"]').forEach((radio) => {
+                        radio.checked = radio.value === currentUserType;
+                    });
+
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
                 });
@@ -99,7 +117,6 @@
             document.getElementById('cancel-role-modal').addEventListener('click', closeModal);
 
             document.getElementById('save-role-modal').addEventListener('click', () => {
-                closeModal();
                 toast.classList.remove('hidden');
                 setTimeout(() => toast.classList.add('hidden'), 1700);
             });

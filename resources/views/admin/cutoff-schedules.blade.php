@@ -50,28 +50,31 @@
 
         <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
             <h3 class="text-lg font-bold">Auto - Generate Settings</h3>
-            <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div>
-                    <label class="mb-1 block text-xs font-semibold">Cut-off Frequency</label>
-                    <select class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        <option>Semi-monthly</option>
-                        <option>Bi - Weekly</option>
-                        <option>Weekly</option>
-                        <option>Monthly</option>
-                    </select>
+            <form method="POST" action="{{ route('admin.policy.cutoff.settings.update') }}">
+                @csrf
+                <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold">Cut-off Frequency</label>
+                        <select name="frequency" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                            <option @selected(($settings['frequency'] ?? '') === 'Semi-monthly')>Semi-monthly</option>
+                            <option @selected(($settings['frequency'] ?? '') === 'Bi - Weekly')>Bi - Weekly</option>
+                            <option @selected(($settings['frequency'] ?? '') === 'Weekly')>Weekly</option>
+                            <option @selected(($settings['frequency'] ?? '') === 'Monthly')>Monthly</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold">Pay Delay (Days)</label>
+                        <input name="pay_delay" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $settings['pay_delay'] ?? 5 }}">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-semibold">Generate Ahead (Months)</label>
+                        <input name="generate_ahead" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="{{ $settings['generate_ahead'] ?? 3 }}">
+                    </div>
                 </div>
-                <div>
-                    <label class="mb-1 block text-xs font-semibold">Pay Delay (Days)</label>
-                    <input type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="5">
+                <div class="mt-3 text-right">
+                    <button class="rounded-lg bg-[#242b34] px-4 py-2 text-xs font-semibold text-white">Save Settings</button>
                 </div>
-                <div>
-                    <label class="mb-1 block text-xs font-semibold">Generate Ahead (Months)</label>
-                    <input type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" value="3">
-                </div>
-            </div>
-            <div class="mt-3 text-right">
-                <button class="rounded-lg bg-[#242b34] px-4 py-2 text-xs font-semibold text-white">Save Settings</button>
-            </div>
+            </form>
         </article>
     </div>
 
@@ -96,18 +99,21 @@
         <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <h4 class="text-3xl font-bold">Add Cut-off Period</h4>
             <p class="text-sm text-slate-500">Define a new payroll cut-off period</p>
-            <div class="mt-3 space-y-2">
-                <input type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., March 2026 - 1st Half">
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="date" class="rounded-xl border border-slate-300 px-3 py-2">
-                    <input type="date" class="rounded-xl border border-slate-300 px-3 py-2">
+            <form method="POST" action="{{ route('admin.policy.cutoff.periods.store') }}">
+                @csrf
+                <div class="mt-3 space-y-2">
+                    <input name="period" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., March 2026 - 1st Half" required>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input name="start_date" type="date" class="rounded-xl border border-slate-300 px-3 py-2" required>
+                        <input name="end_date" type="date" class="rounded-xl border border-slate-300 px-3 py-2" required>
+                    </div>
+                    <input name="pay_date" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2" required>
                 </div>
-                <input type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2">
-            </div>
-            <div class="mt-4 flex justify-end gap-2">
-                <button id="close-cutoff-modal" class="rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
-                <button class="rounded-lg bg-[#242b34] px-4 py-2 text-sm font-semibold text-white">+ Add Period</button>
-            </div>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button id="close-cutoff-modal" type="button" class="rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
+                    <button class="rounded-lg bg-[#242b34] px-4 py-2 text-sm font-semibold text-white">+ Add Period</button>
+                </div>
+            </form>
         </div>
     </div>
 @endsection

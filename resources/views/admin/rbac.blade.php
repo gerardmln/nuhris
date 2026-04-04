@@ -12,12 +12,13 @@
         </div>
 
         <div class="flex gap-2">
-            <button class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Reset Changes</button>
-            <button class="rounded-lg bg-[#083b72] px-4 py-2 text-sm font-semibold text-white">Save Changes</button>
+            <button type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Reset Changes</button>
+            <button type="button" class="rounded-lg bg-[#083b72] px-4 py-2 text-sm font-semibold text-white">Save Changes</button>
         </div>
     </div>
 
-    <div id="rbac-role-view" class="space-y-3">
+    <form method="POST" action="{{ route('admin.users.rbac.save') }}" id="rbac-role-view" class="space-y-3">
+        @csrf
         <div class="flex flex-wrap gap-2">
             @foreach ($roles as $role)
                 <button class="rbac-role-btn rounded border border-slate-300 px-4 py-1 text-sm font-semibold {{ $role === 'Admin' ? 'bg-[#083b72] text-white' : 'bg-white text-[#24358a]' }}" data-role="{{ $role }}">{{ $role }}</button>
@@ -35,7 +36,7 @@
                         <div class="mt-2 flex flex-wrap gap-3 text-xs">
                             @foreach ($permissions as $perm)
                                 <label class="inline-flex items-center gap-1">
-                                    <input type="checkbox" checked>
+                                    <input type="checkbox" name="matrix[{{ $role }}][]" value="{{ $perm }}" @checked(in_array($perm, $matrix[$role] ?? [], true))>
                                     <span>{{ $perm }}</span>
                                 </label>
                             @endforeach
@@ -43,8 +44,12 @@
                     </div>
                 @endforeach
             </div>
+
+            <div class="mt-4 text-right">
+                <button class="rounded-lg bg-[#083b72] px-4 py-2 text-sm font-semibold text-white">Save Role Permissions</button>
+            </div>
         </article>
-    </div>
+    </form>
 
     <div id="rbac-matrix-view" class="hidden">
         <article class="overflow-x-auto rounded-xl border border-slate-300 bg-white p-4 shadow-sm">

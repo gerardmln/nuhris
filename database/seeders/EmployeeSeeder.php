@@ -90,10 +90,18 @@ class EmployeeSeeder extends Seeder
 
         foreach ($employees as $index => $employeeData) {
             $department = $departments->get($index % count($departments));
-            Employee::create([
+
+            $employee = Employee::withTrashed()->firstOrNew([
+                'employee_id' => $employeeData['employee_id'],
+            ]);
+
+            $employee->fill([
                 ...$employeeData,
                 'department_id' => $department->id,
+                'deleted_at' => null,
             ]);
+
+            $employee->save();
         }
     }
 }

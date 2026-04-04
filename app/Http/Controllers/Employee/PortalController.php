@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreEmployeeCredentialRequest;
+use App\Http\Requests\UpdateEmployeeAccountRequest;
 use App\Models\AnnouncementNotification;
+use App\Models\Department;
 use App\Models\Employee;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
+use App\Models\EmployeeCredential;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class PortalController extends Controller
@@ -29,26 +31,38 @@ class PortalController extends Controller
             ->limit(3)
             ->get();
 
-        $activeCredentials = $employee && $employee->resume_last_updated_at ? 1 : 0;
-        $pendingCredentials = $employee && $employee->resume_last_updated_at && $employee->resume_last_updated_at->lt(now()->subMonths(6)) ? 1 : 0;
+        $credentialsQuery = $employee ? EmployeeCredential::query()->where('employee_id', $employee->id) : EmployeeCredential::query()->whereRaw('1 = 0');
+        $activeCredentials = (clone $credentialsQuery)
+            ->where('status', 'verified')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')->orWhereDate('expires_at', '>=', now()->toDateString());
+            })
+            ->count();
+
+        $pendingCredentials = (clone $credentialsQuery)->where('status', 'pending')->count();
+        $totalCredentials = (clone $credentialsQuery)->count();
 
         $calendarEvents = $recentAlerts
             ->map(fn (AnnouncementNotification $notification) => $notification->announcement?->title)
             ->filter()
             ->values();
 
+        $leaveBalance = $employee
+            ? (float) $employee->leaveBalances()->sum('remaining_days')
+            : 0;
+
         return view('employee.dashboard', [
             'employee' => $employee,
             'stats' => [
                 'active_credentials' => $activeCredentials,
                 'pending_credentials' => $pendingCredentials,
-                'compliance_total' => max($activeCredentials, 1),
+                'compliance_total' => max($totalCredentials, 1),
                 'compliance_passed' => $activeCredentials,
-                'leave_balance' => $this->leaveBalanceFor($employee),
+                'leave_balance' => $leaveBalance,
                 'notifications' => $notificationsCount,
                 'compliant' => $activeCredentials,
                 'expiring_soon' => $pendingCredentials,
-                'non_compliant' => $activeCredentials === 0 ? 1 : 0,
+                'non_compliant' => max($totalCredentials - $activeCredentials - $pendingCredentials, 0),
             ],
             'recentAlerts' => $recentAlerts,
             'calendar' => [
@@ -63,24 +77,32 @@ class PortalController extends Controller
     {
         $employee = Employee::query()->with('department')->where('email', $request->user()->email)->first();
 
-        $credentials = collect();
+        $credentials = $employee
+            ? EmployeeCredential::query()->where('employee_id', $employee->id)->latest()->get()
+            : collect();
 
-        if ($employee && $employee->resume_last_updated_at) {
-            $credentials->push([
-                'type' => 'resume',
-                'label' => 'Resume',
-                'title' => 'Professional Resume',
-                'status' => $employee->resume_last_updated_at->lt(now()->subMonths(6)) ? 'Needs Update' : 'Valid',
-                'updated_at' => $employee->resume_last_updated_at,
-            ]);
-        }
+        $mapped = $credentials->map(function (EmployeeCredential $credential) {
+            return [
+                'type' => $credential->credential_type,
+                'label' => match ($credential->credential_type) {
+                    'resume' => 'Resume',
+                    'prc' => 'PRC License',
+                    'seminars' => 'Seminars',
+                    'degrees' => 'Degrees',
+                    default => 'Ranking',
+                },
+                'title' => $credential->title,
+                'status' => ucfirst(str_replace('_', ' ', $credential->status)),
+                'updated_at' => $credential->updated_at,
+            ];
+        });
 
-        $byType = $credentials->groupBy('type')->map->count();
+        $byType = $mapped->groupBy('type')->map->count();
 
         return view('employee.credentials', [
-            'credentials' => $credentials,
+            'credentials' => $mapped,
             'credentialCounts' => [
-                'all' => $credentials->count(),
+                'all' => $mapped->count(),
                 'resume' => (int) $byType->get('resume', 0),
                 'prc' => (int) $byType->get('prc', 0),
                 'seminars' => (int) $byType->get('seminars', 0),
@@ -103,68 +125,99 @@ class PortalController extends Controller
                 'Academic Degree',
                 'Ranking File',
             ],
-            'departments' => Employee::query()
-                ->with('department')
-                ->whereNotNull('department_id')
-                ->get()
-                ->pluck('department.name')
-                ->filter()
-                ->unique()
-                ->values(),
+            'departments' => Department::query()->orderBy('name')->get(),
         ]);
+    }
+
+    public function storeCredential(StoreEmployeeCredentialRequest $request): RedirectResponse
+    {
+        $employee = Employee::query()->where('email', $request->user()->email)->first();
+
+        if (! $employee) {
+            return redirect()->route('employee.credentials')->with('error', 'Employee profile not found. Please contact HR.');
+        }
+
+        $filePath = $request->file('credential_file')
+            ? $request->file('credential_file')->store('employee-credentials', 'public')
+            : null;
+
+        EmployeeCredential::create([
+            'employee_id' => $employee->id,
+            'credential_type' => $request->string('credential_type')->toString(),
+            'title' => $request->string('title')->toString(),
+            'department_id' => $request->input('department_id'),
+            'expires_at' => $request->input('expires_at'),
+            'description' => $request->input('description'),
+            'file_path' => $filePath,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('employee.credentials')->with('success', 'Credential uploaded successfully.');
     }
 
     public function attendance(Request $request): View
     {
         $employee = Employee::query()->where('email', $request->user()->email)->first();
-        $records = $this->buildAttendanceRecords($employee);
+        $records = $employee
+            ? $employee->attendanceRecords()->orderByDesc('record_date')->get()
+            : collect();
 
         $totals = [
             'tardiness' => $records->sum('tardiness_minutes'),
             'undertime' => $records->sum('undertime_minutes'),
             'overtime' => $records->sum('overtime_minutes'),
-            'absences' => $records->where('status', 'Absent')->count(),
-            'workload_credits' => $records->where('status', 'Present')->count(),
+            'absences' => $records->where('status', 'absent')->count(),
+            'workload_credits' => $records->where('status', 'present')->count(),
         ];
 
+        $mappedRecords = $records->map(function ($record) {
+            return [
+                'date' => $record->record_date?->format('M d, Y') ?? '-',
+                'time_in' => $record->time_in?->format('h:i A'),
+                'time_out' => $record->time_out?->format('h:i A'),
+                'scheduled' => ($record->scheduled_time_in?->format('h:i A') ?? '08:30 AM').' - '.($record->scheduled_time_out?->format('h:i A') ?? '05:30 PM'),
+                'tardiness_minutes' => $record->tardiness_minutes,
+                'undertime_minutes' => $record->undertime_minutes,
+                'overtime_minutes' => $record->overtime_minutes,
+                'status' => ucfirst(str_replace('_', ' ', $record->status)),
+            ];
+        });
+
+        $periods = $records
+            ->map(fn ($record) => optional($record->record_date)->format('F Y'))
+            ->filter()
+            ->unique()
+            ->values();
+
         return view('employee.attendance', [
-            'records' => $records,
+            'records' => $mappedRecords,
             'totals' => $totals,
-            'periods' => [now()->format('F Y')],
+            'periods' => $periods->isNotEmpty() ? $periods : collect([now()->format('F Y')]),
         ]);
     }
 
     public function leave(Request $request): View
     {
         $employee = Employee::query()->where('email', $request->user()->email)->first();
-        $seed = $employee ? abs(crc32($employee->employee_id ?? $employee->email)) : 7;
 
-        $leaveBalances = [
-            ['type' => 'Vacation Leave', 'remaining' => 8 + ($seed % 6)],
-            ['type' => 'Sick Leave', 'remaining' => 6 + ($seed % 5)],
-            ['type' => 'Emergency Leave', 'remaining' => 2 + ($seed % 2)],
-        ];
+        $leaveBalances = $employee
+            ? $employee->leaveBalances()->orderBy('leave_type')->get()->map(fn ($row) => [
+                'type' => $row->leave_type,
+                'remaining' => rtrim(rtrim(number_format($row->remaining_days, 2, '.', ''), '0'), '.'),
+            ])->values()
+            : collect();
 
-        $leaveHistory = collect([
-            [
-                'type' => 'Sick Leave',
-                'start' => now()->subDays(23)->toDateString(),
-                'end' => now()->subDays(22)->toDateString(),
-                'days' => 2,
-                'status' => 'Approved',
-                'cutoff' => now()->subDays(15)->format('M d, Y'),
-                'reason' => 'Medical rest',
-            ],
-            [
-                'type' => 'Vacation Leave',
-                'start' => now()->subDays(45)->toDateString(),
-                'end' => now()->subDays(43)->toDateString(),
-                'days' => 3,
-                'status' => 'Approved',
-                'cutoff' => now()->subDays(30)->format('M d, Y'),
-                'reason' => 'Family commitment',
-            ],
-        ]);
+        $leaveHistory = $employee
+            ? $employee->leaveRequests()->latest('start_date')->get()->map(fn ($row) => [
+                'type' => $row->leave_type,
+                'start' => $row->start_date?->toDateString(),
+                'end' => $row->end_date?->toDateString(),
+                'days' => rtrim(rtrim(number_format($row->days_deducted, 2, '.', ''), '0'), '.'),
+                'status' => ucfirst($row->status),
+                'cutoff' => $row->cutoff_date?->format('M d, Y') ?? '-',
+                'reason' => $row->reason,
+            ])->values()
+            : collect();
 
         return view('employee.leave', [
             'leaveBalances' => $leaveBalances,
@@ -178,48 +231,34 @@ class PortalController extends Controller
 
         return view('employee.account', [
             'employee' => $employee,
+            'departments' => Department::query()->orderBy('name')->get(),
             'employeeTypes' => ['Faculty', 'Security', 'ASP'],
         ]);
     }
 
-    private function leaveBalanceFor(?Employee $employee): int
+    public function updateAccount(UpdateEmployeeAccountRequest $request): RedirectResponse
     {
-        if (! $employee) {
-            return 0;
+        $user = $request->user();
+        $employee = Employee::query()->where('email', $user->email)->first();
+
+        $user->update([
+            'name' => $request->string('name')->toString(),
+        ]);
+
+        if ($employee) {
+            $departmentId = $request->input('department_id') ?: $employee->department_id;
+
+            $employee->update([
+                'employee_id' => $request->input('employee_id') ?: $employee->employee_id,
+                'department_id' => $departmentId,
+                'phone' => $request->input('phone'),
+                'position' => $request->input('position'),
+                'hire_date' => $request->input('hire_date'),
+                'address' => $request->input('address'),
+                'employment_type' => $request->input('employee_type') ?: $employee->employment_type,
+            ]);
         }
 
-        return 10 + (abs(crc32($employee->employee_id ?? $employee->email)) % 8);
-    }
-
-    private function buildAttendanceRecords(?Employee $employee): Collection
-    {
-        $period = CarbonPeriod::create(now()->startOfMonth(), now()->endOfMonth());
-
-        return collect($period)
-            ->filter(fn (Carbon $date) => ! $date->isWeekend())
-            ->take(12)
-            ->map(function (Carbon $date, int $index) use ($employee) {
-                $seed = $employee ? abs(crc32(($employee->employee_id ?? $employee->email).$date->toDateString())) : $index;
-
-                $isAbsent = $seed % 11 === 0;
-                $tardiness = $isAbsent ? 0 : ($seed % 3) * 5;
-                $undertime = $isAbsent ? 0 : ($seed % 2) * 5;
-                $overtime = $isAbsent ? 0 : ($seed % 4) * 5;
-
-                $timeIn = $isAbsent ? null : $date->copy()->setTime(8, 30)->addMinutes($tardiness)->format('h:i A');
-                $timeOut = $isAbsent ? null : $date->copy()->setTime(17, 30)->subMinutes($undertime)->addMinutes($overtime)->format('h:i A');
-
-                return [
-                    'date' => $date->format('M d, Y'),
-                    'time_in' => $timeIn,
-                    'time_out' => $timeOut,
-                    'scheduled' => '08:30 AM - 05:30 PM',
-                    'tardiness_minutes' => $tardiness,
-                    'undertime_minutes' => $undertime,
-                    'overtime_minutes' => $overtime,
-                    'status' => $isAbsent ? 'Absent' : 'Present',
-                ];
-            })
-            ->values();
+        return redirect()->route('employee.account')->with('success', 'Account updated successfully.');
     }
 }

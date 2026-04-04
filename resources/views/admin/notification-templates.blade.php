@@ -75,36 +75,37 @@
                 <button id="close-template-modal" type="button" class="text-xl text-slate-600">x</button>
             </div>
 
-            <form class="space-y-3">
+            <form class="space-y-3" method="POST" action="{{ route('admin.policy.templates.store') }}">
+                @csrf
                 <div>
                     <label class="mb-1 block text-xs font-semibold">Template Type</label>
-                    <select class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        <option>Email</option>
-                        <option>SMS</option>
-                        <option>In-App</option>
+                    <select name="type" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <option value="email">Email</option>
+                        <option value="sms">SMS</option>
+                        <option value="inapp">In-App</option>
                     </select>
                 </div>
 
                 <div>
                     <label class="mb-1 block text-xs font-semibold">Template Name</label>
-                    <input type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g., Compliance Reminder">
+                    <input name="name" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g., Compliance Reminder" required>
                 </div>
 
                 <div>
                     <label class="mb-1 block text-xs font-semibold">Trigger</label>
-                    <input type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g., PRC license expiring (30 days)">
+                    <input name="trigger" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="e.g., PRC license expiring (30 days)">
                 </div>
 
                 <div>
                     <label class="mb-1 block text-xs font-semibold">Message</label>
-                    <textarea class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" rows="4" placeholder="Type the template message..."></textarea>
+                    <textarea name="message" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" rows="4" placeholder="Type the template message..."></textarea>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-2">
+                    <button id="cancel-template-modal" type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Cancel</button>
+                    <button id="save-template-modal" type="submit" class="rounded-lg bg-[#083b72] px-4 py-2 text-sm font-semibold text-white">Add Template</button>
                 </div>
             </form>
-
-            <div class="mt-4 flex justify-end gap-2">
-                <button id="cancel-template-modal" type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Cancel</button>
-                <button id="save-template-modal" type="button" class="rounded-lg bg-[#083b72] px-4 py-2 text-sm font-semibold text-white">Add Template</button>
-            </div>
         </div>
     </div>
 @endsection
@@ -148,7 +149,9 @@
             openInline?.addEventListener('click', openModal);
             closeBtn?.addEventListener('click', closeModal);
             cancelBtn?.addEventListener('click', closeModal);
-            saveBtn?.addEventListener('click', closeModal);
+            saveBtn?.addEventListener('click', () => {
+                // Allow form submit and route handling.
+            });
 
             modal.addEventListener('click', (event) => {
                 if (event.target === modal) {

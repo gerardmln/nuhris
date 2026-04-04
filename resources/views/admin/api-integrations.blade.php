@@ -14,7 +14,16 @@
     <article class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
         <div class="mb-3 flex items-center justify-between">
             <h3 class="text-2xl font-bold text-[#24358a]">API Integrations</h3>
-            <button class="rounded-lg bg-[#083b72] px-4 py-2 text-xs font-semibold text-white">+ Add Integration</button>
+            <form method="POST" action="{{ route('admin.integration.api.store') }}" class="flex items-center gap-2">
+                @csrf
+                <input name="name" type="text" class="rounded-lg border border-slate-300 px-3 py-2 text-xs" placeholder="Integration name" required>
+                <select name="status" class="rounded-lg border border-slate-300 px-3 py-2 text-xs">
+                    <option>Connected</option>
+                    <option>Disconnected</option>
+                    <option>Issue</option>
+                </select>
+                <button class="rounded-lg bg-[#083b72] px-4 py-2 text-xs font-semibold text-white">+ Add Integration</button>
+            </form>
         </div>
         <div class="space-y-3">
             @foreach ($integrations as $api)
@@ -36,7 +45,15 @@
         <h3 class="text-2xl font-bold text-[#24358a]">API Keys</h3>
         <div class="mt-3 space-y-2">
             @foreach ($apiKeys as $label => $value)
-                <div class="rounded-lg bg-[#cfe1f5] p-3"><p class="font-semibold">{{ $label }}</p><p class="text-xs">{{ $value }}</p></div>
+                <form method="POST" action="{{ route('admin.integration.api.keys.update') }}" class="rounded-lg bg-[#cfe1f5] p-3">
+                    @csrf
+                    <input type="hidden" name="label" value="{{ $label }}">
+                    <p class="font-semibold">{{ $label }}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <input type="text" name="key_value" value="{{ $value }}" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+                        <button class="rounded border border-blue-300 bg-white px-2 py-1 text-xs text-blue-700">Save</button>
+                    </div>
+                </form>
             @endforeach
         </div>
     </article>

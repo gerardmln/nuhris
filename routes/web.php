@@ -74,6 +74,8 @@ Route::prefix('employee')->name('employee.')->middleware(['auth', 'user.type:3']
 
     Route::get('/credentials/upload', [EmployeePortalController::class, 'credentialsUpload'])->name('credentials.upload');
 
+    Route::post('/credentials/upload', [EmployeePortalController::class, 'storeCredential'])->name('credentials.upload.store');
+
     Route::get('/attendance-dtr', [EmployeePortalController::class, 'attendance'])->name('attendance');
 
     Route::get('/leave-monitoring', [EmployeePortalController::class, 'leave'])->name('leave');
@@ -91,6 +93,8 @@ Route::prefix('employee')->name('employee.')->middleware(['auth', 'user.type:3']
     })->name('notifications');
 
     Route::get('/account', [EmployeePortalController::class, 'account'])->name('account');
+
+    Route::post('/account', [EmployeePortalController::class, 'updateAccount'])->name('account.update');
 });
 
 // Admin (User) Module Routes
@@ -105,21 +109,41 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'user.type:1'])->gro
 
     Route::get('/user-management/role-assignment', [AdminPortalController::class, 'roleAssignment'])->name('users.role-assignment');
 
+    Route::post('/user-management/role-assignment', [AdminPortalController::class, 'updateUserRole'])->name('users.role-assignment.update');
+
     Route::get('/user-management/rbac-permissions', [AdminPortalController::class, 'rbac'])->name('users.rbac');
+
+    Route::post('/user-management/rbac-permissions', [AdminPortalController::class, 'saveRbac'])->name('users.rbac.save');
 
     Route::get('/policy/cutoff-schedules', [AdminPortalController::class, 'cutoffSchedules'])->name('policy.cutoff');
 
+    Route::post('/policy/cutoff-schedules/periods', [AdminPortalController::class, 'storeCutoffPeriod'])->name('policy.cutoff.periods.store');
+
+    Route::post('/policy/cutoff-schedules/settings', [AdminPortalController::class, 'updateCutoffSettings'])->name('policy.cutoff.settings.update');
+
     Route::get('/policy/leave-rules', [AdminPortalController::class, 'leaveRules'])->name('policy.leave');
+
+    Route::post('/policy/leave-rules', [AdminPortalController::class, 'storeLeaveType'])->name('policy.leave.store');
 
     Route::get('/policy/compliance-rules', [AdminPortalController::class, 'complianceRules'])->name('policy.compliance');
 
     Route::get('/policy/notification-templates', [AdminPortalController::class, 'notificationTemplates'])->name('policy.templates');
 
+    Route::post('/policy/notification-templates', [AdminPortalController::class, 'storeNotificationTemplate'])->name('policy.templates.store');
+
     Route::get('/integration/api-integrations', [AdminPortalController::class, 'apiIntegrations'])->name('integration.api');
+
+    Route::post('/integration/api-integrations', [AdminPortalController::class, 'storeIntegration'])->name('integration.api.store');
+
+    Route::post('/integration/api-integrations/keys', [AdminPortalController::class, 'updateApiKey'])->name('integration.api.keys.update');
 
     Route::get('/integration/audit-logs', [AdminPortalController::class, 'auditLogs'])->name('integration.audit');
 
     Route::get('/integration/data-validation', [AdminPortalController::class, 'dataValidation'])->name('integration.validation');
+
+    Route::post('/integration/data-validation', [AdminPortalController::class, 'storeValidationRule'])->name('integration.validation.store');
+
+    Route::post('/policy/compliance-rules', [AdminPortalController::class, 'storeValidationRule'])->name('policy.compliance.store');
 
     Route::get('/integration/backup-security', [AdminPortalController::class, 'backupSecurity'])->name('integration.backup');
 

@@ -42,24 +42,27 @@
         <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <h4 class="text-3xl font-bold">Add Cut-off Period</h4>
             <p class="text-sm text-slate-500">Define a new payroll cut-off period</p>
-            <div class="mt-3 space-y-2">
-                <input type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., Email Format">
-                <input type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., email">
-                <select class="w-full rounded-xl border border-slate-300 px-3 py-2">
-                    <option>Select Type</option>
-                    <option>Regular Expression</option>
-                    <option>Number Range</option>
-                    <option>Date Range</option>
-                    <option>Length Constraint</option>
-                    <option>Allowed Values</option>
-                </select>
-                <input type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., [2392fnjc]2o]@34 +@3">
-                <textarea class="w-full rounded-xl border border-slate-300 px-3 py-2" rows="3" placeholder="Message to display when validation fails"></textarea>
-            </div>
-            <div class="mt-4 flex justify-end gap-2">
-                <button id="close-validation-rule-modal" class="rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
-                <button class="rounded-lg bg-[#242b34] px-4 py-2 text-sm font-semibold text-white">+ Add Rule</button>
-            </div>
+            <form method="POST" action="{{ route('admin.integration.validation.store') }}">
+                @csrf
+                <div class="mt-3 space-y-2">
+                    <input name="field_label" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., Email Format" required>
+                    <input name="field_name" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., email">
+                    <select name="rule_type" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                        <option>Select Type</option>
+                        <option>Regular Expression</option>
+                        <option>Number Range</option>
+                        <option>Date Range</option>
+                        <option>Length Constraint</option>
+                        <option>Allowed Values</option>
+                    </select>
+                    <input name="rule_value" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., [2392fnjc]2o]@34 +@3">
+                    <textarea name="message" class="w-full rounded-xl border border-slate-300 px-3 py-2" rows="3" placeholder="Message to display when validation fails"></textarea>
+                </div>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button id="close-validation-rule-modal" type="button" class="rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
+                    <button class="rounded-lg bg-[#242b34] px-4 py-2 text-sm font-semibold text-white">+ Add Rule</button>
+                </div>
+            </form>
         </div>
     </div>
 @endsection

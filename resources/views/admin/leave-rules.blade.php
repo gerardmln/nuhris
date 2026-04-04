@@ -72,24 +72,27 @@
         <div class="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl">
             <h4 class="text-3xl font-bold">Add Leave Type</h4>
             <p class="text-sm text-slate-500">Create a new leave type with accrual rules</p>
-            <div class="mt-3 space-y-2">
-                <input type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., Birthday Leave">
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="number" class="rounded-xl border border-slate-300 px-3 py-2" placeholder="0">
-                    <input type="number" class="rounded-xl border border-slate-300 px-3 py-2" placeholder="15">
+            <form method="POST" action="{{ route('admin.policy.leave.store') }}">
+                @csrf
+                <div class="mt-3 space-y-2">
+                    <input name="type" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., Birthday Leave" required>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input name="accrual" type="number" step="0.01" class="rounded-xl border border-slate-300 px-3 py-2" placeholder="0">
+                        <input name="max" type="number" class="rounded-xl border border-slate-300 px-3 py-2" placeholder="15" required>
+                    </div>
+                    <select name="applies_to" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                        <option>All Employees</option>
+                        <option>Regular Employees</option>
+                        <option>Faculty only</option>
+                        <option>Female Employees</option>
+                        <option>Male Employees</option>
+                    </select>
                 </div>
-                <select class="w-full rounded-xl border border-slate-300 px-3 py-2">
-                    <option>All Employees</option>
-                    <option>Regular Employees</option>
-                    <option>Faculty only</option>
-                    <option>Female Employees</option>
-                    <option>Male Employees</option>
-                </select>
-            </div>
-            <div class="mt-4 flex justify-end gap-2">
-                <button id="close-leave-type-modal" class="rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
-                <button class="rounded-lg bg-[#242b34] px-4 py-2 text-sm font-semibold text-white">+ Add Type</button>
-            </div>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button id="close-leave-type-modal" type="button" class="rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
+                    <button class="rounded-lg bg-[#242b34] px-4 py-2 text-sm font-semibold text-white">+ Add Type</button>
+                </div>
+            </form>
         </div>
     </div>
 @endsection

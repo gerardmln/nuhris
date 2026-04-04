@@ -192,6 +192,12 @@
                         <p class="text-sm text-slate-500">@yield('page_subtitle')</p>
                     @endif
                 </div>
+                @if (session('success'))
+                    <div class="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>
+                @endif
+                @if (session('error'))
+                    <div class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">{{ session('error') }}</div>
+                @endif
                 @yield('content')
             </section>
         </main>
