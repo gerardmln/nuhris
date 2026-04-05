@@ -206,59 +206,66 @@
                 <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <div class="px-8 pb-8">
+            <form method="POST" action="{{ route('employees.store') }}" class="px-8 pb-8">
+                @csrf
+                <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+                    <p class="text-xs text-blue-800">Fields marked with * are required.</p>
+                </div>
+
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">First Name</label>
-                        <input type="text" placeholder="Juan" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Employee ID *</label>
+                        <input name="employee_id" type="text" placeholder="EMP-0001" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">Last Name</label>
-                        <input type="text" placeholder="Dela Cruz" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">First Name *</label>
+                        <input name="first_name" type="text" placeholder="Juan" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">Email</label>
-                        <input type="email" placeholder="name@nu.edu.ph" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Last Name *</label>
+                        <input name="last_name" type="text" placeholder="Dela Cruz" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Email *</label>
+                        <input name="email" type="email" placeholder="name@nu.edu.ph" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">Phone Number</label>
-                        <input type="text" placeholder="09xxxxxxxxx" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                        <input name="phone" type="text" placeholder="09xxxxxxxxx" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">Department</label>
-                        <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
-                            <option>College of Engineering</option>
-                            <option>College of Business</option>
-                            <option>College of Education</option>
-                            <option>College of Arts &amp; Sciences</option>
-                            <option>College of Computing</option>
-                            <option>College of Allied Health</option>
-                            <option>Administration</option>
-                            <option>Human Resources</option>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Department *</label>
+                        <select name="department_id" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
+                            <option value="">Select Department</option>
+                            @foreach ($departments as $department)
+                                <option value="{{ $department->id }}">{{ $department->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">Position</label>
-                        <input type="text" placeholder="Faculty" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Position *</label>
+                        <input name="position" type="text" placeholder="Faculty" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">Date Hired</label>
-                        <input type="date" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                        <input name="hire_date" type="date" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">Status</label>
-                        <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
-                            <option>Active</option>
-                            <option>Inactive</option>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Status *</label>
+                        <select name="status" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
+                            <option value="active">Active</option>
+                            <option value="on_leave">On Leave</option>
+                            <option value="resigned">Resigned</option>
+                            <option value="terminated">Terminated</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                     <button type="button" data-close-modal class="rounded-md border border-slate-400 px-6 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-                    <button type="button" data-close-modal class="rounded-md bg-[#00386f] px-6 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">Save Employee</button>
+                    <button type="submit" class="rounded-md bg-[#00386f] px-6 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">Save Employee</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -269,7 +276,8 @@
                 <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <div class="px-8 pb-8">
+            <form method="POST" action="{{ route('biometrics.upload') }}" enctype="multipart/form-data" class="px-8 pb-8">
+                @csrf
                 <label class="mb-2 block text-sm font-semibold text-slate-700">Credential File (PDF)</label>
 
                 <div class="rounded-lg border border-dashed border-slate-400 p-8 text-center">
@@ -280,13 +288,14 @@
                             <path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
                         </svg>
                     </div>
-                    <p class="mt-3 text-sm text-slate-500">Click to upload or drag and drop</p>
-                    <p class="text-xs text-slate-400">PDF, CSV, or XLSX</p>
+                    <p class="mt-3 text-sm text-slate-500">Select a PDF file to upload</p>
+                    <p class="text-xs text-slate-400">Accepted format: PDF</p>
+                    <input name="biometrics_file" type="file" accept="application/pdf,.pdf" class="mt-4 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700" required>
                 </div>
 
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                     <button type="button" data-close-modal class="rounded-md border border-slate-400 px-6 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-                    <button type="button" data-close-modal class="inline-flex items-center justify-center gap-2 rounded-md bg-[#00386f] px-6 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-md bg-[#00386f] px-6 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="9"></circle>
                             <path d="m9 12 2 2 4-4"></path>
@@ -294,7 +303,7 @@
                         Process File
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -308,58 +317,57 @@
                 <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <div class="px-8 pb-8">
+            <form method="POST" action="{{ route('announcements.store') }}" class="px-8 pb-8">
+                @csrf
                 <div class="space-y-4">
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Title *</label>
-                        <input type="text" placeholder="Announcement title" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                        <input name="title" type="text" placeholder="Announcement title" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
                     </div>
 
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Content *</label>
-                        <textarea rows="4" placeholder="Write your announcement here..." class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none"></textarea>
+                        <textarea name="content" rows="4" placeholder="Write your announcement here..." class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
                             <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Priority</label>
-                            <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
-                                <option>Medium</option>
-                                <option>Low</option>
-                                <option>High</option>
+                            <select name="priority" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                                <option value="high">High</option>
                             </select>
                         </div>
                         <div>
                             <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Target Audience</label>
-                            <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
-                                <option>Specific Department</option>
-                                <option>Faculty Only</option>
-                                <option>Everyone</option>
+                            <select name="target_user_type" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                                <option value="">Everyone</option>
+                                <option value="1">Admin</option>
+                                <option value="2">HR</option>
+                                <option value="3">Employee</option>
                             </select>
                         </div>
                     </div>
 
                     <div>
-                        <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Target Department</label>
-                        <select class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
-                            <option>Select Department</option>
-                            <option>College of Engineering</option>
-                            <option>College of Business</option>
-                            <option>College of Education</option>
-                            <option>College of Arts &amp; Sciences</option>
-                            <option>College of Computing</option>
-                            <option>College of Allied Health</option>
-                            <option>Administration</option>
-                            <option>Human Resources</option>
-                        </select>
+                        <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Publish Date</label>
+                        <input name="published_at" type="date" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                    </div>
+
+                    <div class="rounded-lg bg-slate-50 px-4 py-2">
+                        <label class="flex items-center justify-between text-sm font-semibold text-[#1f2b8b]">
+                            Publish immediately
+                            <input name="is_published" type="checkbox" checked value="1" class="h-5 w-10 cursor-pointer accent-[#1f2b8b]">
+                        </label>
                     </div>
                 </div>
 
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                     <button type="button" data-close-modal class="rounded-md border border-slate-400 px-6 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-                    <button type="button" data-close-modal class="rounded-md bg-[#00386f] px-6 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">Post announcement</button>
+                    <button type="submit" class="rounded-md bg-[#00386f] px-6 py-2 text-sm font-semibold text-white hover:bg-[#002f5d]">Post announcement</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 

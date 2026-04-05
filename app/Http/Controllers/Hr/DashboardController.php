@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Hr;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\Department;
 use App\Models\Employee;
 use Illuminate\View\View;
 
@@ -38,6 +39,7 @@ class DashboardController extends Controller
         return view('hr.dashboard', [
             'stats' => $stats,
             'announcements' => $announcements,
+            'departments' => Department::query()->orderBy('name')->get(),
         ]);
     }
 }
