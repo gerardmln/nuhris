@@ -33,6 +33,7 @@ class AnnouncementController extends Controller
 
         return view('hr.announcements', [
             'announcements' => $announcements,
+            'officeAudiences' => config('hris.admin_support_offices', []),
             'filters' => [
                 'search' => $search,
                 'priority' => $priority,
@@ -62,6 +63,12 @@ class AnnouncementController extends Controller
 
             if ($announcement->target_user_type) {
                 $userQuery->where('user_type', $announcement->target_user_type);
+            }
+
+            if ($announcement->target_office) {
+                $userQuery->whereHas('employeeProfile', function ($query) use ($announcement): void {
+                    $query->where('position', $announcement->target_office);
+                });
             }
 
             $userIds = $userQuery->pluck('id');

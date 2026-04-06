@@ -17,6 +17,7 @@ class Announcement extends Model
         'content',
         'priority',
         'target_user_type',
+        'target_office',
         'published_at',
         'expires_at',
         'is_published',
@@ -45,6 +46,10 @@ class Announcement extends Model
 
     public function getAudienceLabelAttribute(): string
     {
+        if ($this->target_office) {
+            return $this->target_office;
+        }
+
         return match ($this->target_user_type) {
             User::TYPE_ADMIN => 'Admin',
             User::TYPE_HR => 'HR',

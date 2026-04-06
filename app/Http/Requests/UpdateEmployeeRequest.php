@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UpdateEmployeeRequest extends FormRequest
@@ -23,6 +24,15 @@ class UpdateEmployeeRequest extends FormRequest
     public function rules(): array
     {
         $employeeId = $this->route('employee')?->id;
+        $employmentTypes = config('hris.employment_types', []);
+        $positions = array_values(array_unique(array_merge(
+            config('hris.faculty_positions', []),
+            config('hris.admin_support_offices', [])
+        )));
+        $rankings = config('hris.faculty_rankings', []);
+        $selectedPosition = Str::lower((string) $this->input('position'));
+        $requiresDepartment = Str::contains($selectedPosition, ['professor', 'dean', 'program chair']);
+        $requiresRanking = Str::contains($selectedPosition, 'professor');
 
         return [
             'employee_id' => ['required', 'string', 'max:50', Rule::unique('employees', 'employee_id')->ignore($employeeId)],
@@ -30,10 +40,14 @@ class UpdateEmployeeRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('employees', 'email')->ignore($employeeId)],
             'phone' => ['nullable', 'string', 'max:50'],
-            'department_id' => ['required', 'exists:departments,id'],
-            'position' => ['required', 'string', 'max:255'],
-            'employment_type' => ['nullable', 'string', 'max:255'],
-            'ranking' => ['nullable', 'string', 'max:255'],
+            'department_id' => [Rule::requiredIf($requiresDepartment), 'nullable', 'exists:departments,id'],
+            'position' => ['required', Rule::in($positions)],
+            'employment_type' => ['required', Rule::in($employmentTypes)],
+            'ranking' => [
+                Rule::requiredIf($requiresRanking),
+                'nullable',
+                Rule::in($rankings),
+            ],
             'status' => ['required', 'in:active,on_leave,resigned,terminated'],
             'hire_date' => ['nullable', 'date'],
             'official_time_in' => ['nullable', 'date_format:H:i'],

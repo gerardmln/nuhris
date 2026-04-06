@@ -230,11 +230,11 @@
                 <button type="button" data-close-modal class="text-5xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <form method="POST" action="{{ route('employees.store') }}" class="grid grid-cols-1 gap-4 px-8 pb-8 md:grid-cols-2">
+            <form method="POST" action="{{ route('employees.store') }}" data-employee-form class="grid grid-cols-1 gap-4 px-8 pb-8 md:grid-cols-2">
                 @csrf
-                <div>
-                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Employee ID</label>
-                    <input name="employee_id" type="text" placeholder="EMP-001" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
+                <div class="md:col-span-2 rounded-md border border-dashed border-slate-300 bg-slate-50 px-3 py-3">
+                    <p class="text-sm font-semibold text-[#1f2b8b]">Employee ID</p>
+                    <p class="text-sm text-slate-500">Automatically generated on save using the format <span class="font-medium text-slate-700">YYYY-001</span>.</p>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Email *</label>
@@ -253,36 +253,39 @@
                     <input name="phone" type="text" placeholder="+63 XXX XXX XXXX" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
+                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Employee Type *</label>
+                    <select name="employment_type" data-employee-control="employment_type" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-700" required>
+                        <option value="">Select type</option>
+                        @foreach ($employmentTypes as $type)
+                            <option value="{{ $type }}">{{ $type }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Position *</label>
+                    <select name="position" data-employee-control="position" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-700" required>
+                        <option value="">Select Position / Office</option>
+                        @foreach ($employeePositions as $position)
+                            <option value="{{ $position }}">{{ $position }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div data-employee-field="department">
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Department *</label>
-                    <select name="department_id" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500" required>
+                    <select name="department_id" data-employee-control="department" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500">
                         <option value="">Select Department</option>
                         @foreach ($departments as $department)
                             <option value="{{ $department->id }}">{{ $department->name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div>
-                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Position *</label>
-                    <input name="position" type="text" placeholder="e.g. Associate Professor" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Employment Type</label>
-                    <select name="employment_type" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500">
-                        <option>Select type</option>
-                        <option>Full-time Faculty</option>
-                        <option>Part-time Faculty</option>
-                        <option>Administrative Staff</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Ranking</label>
-                    <select name="ranking" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
-                        <option>N/A</option>
-                        <option>Instructor I</option>
-                        <option>Instructor II</option>
-                        <option>Associate Professor I</option>
-                        <option>Associate Professor II</option>
-                        <option>Professor</option>
+                <div data-employee-field="ranking">
+                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Faculty Ranking</label>
+                    <select name="ranking" data-employee-control="ranking" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-700">
+                        <option value="">N/A</option>
+                        @foreach ($facultyRankings as $ranking)
+                            <option value="{{ $ranking }}">{{ $ranking }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div>
@@ -383,7 +386,7 @@
                 <button type="button" data-close-modal class="text-5xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <form id="employee-edit-form" method="POST" class="grid grid-cols-1 gap-4 px-8 pb-8 md:grid-cols-2">
+            <form id="employee-edit-form" method="POST" data-employee-form class="grid grid-cols-1 gap-4 px-8 pb-8 md:grid-cols-2">
                 @csrf
                 @method('PUT')
                 <div>
@@ -407,24 +410,37 @@
                     <input id="edit-phone" name="phone" type="text" value="+63 917 123 4567" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Department *</label>
-                    <select id="edit-department-id" name="department_id" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500" required>
-                        @foreach ($departments as $department)
-                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Employee Type *</label>
+                    <select id="edit-employment-type" name="employment_type" data-employee-control="employment_type" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-700" required>
+                        @foreach ($employmentTypes as $type)
+                            <option value="{{ $type }}">{{ $type }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Position *</label>
-                    <input id="edit-position" name="position" type="text" value="Associate Professor" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg" required>
+                    <select id="edit-position" name="position" data-employee-control="position" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-700" required>
+                        @foreach ($employeePositions as $position)
+                            <option value="{{ $position }}">{{ $position }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <div>
-                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Employment Type</label>
-                    <input id="edit-employment-type" name="employment_type" type="text" value="Full-time Faculty" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                <div data-employee-field="department">
+                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Department *</label>
+                    <select id="edit-department-id" name="department_id" data-employee-control="department" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-500">
+                        @foreach ($departments as $department)
+                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <div>
-                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Ranking</label>
-                    <input id="edit-ranking" name="ranking" type="text" value="Associate Professor II" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg">
+                <div data-employee-field="ranking">
+                    <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Faculty Ranking</label>
+                    <select id="edit-ranking" name="ranking" data-employee-control="ranking" class="w-full rounded-md border border-slate-300 px-4 py-2 text-lg text-slate-700">
+                        <option value="">N/A</option>
+                        @foreach ($facultyRankings as $ranking)
+                            <option value="{{ $ranking }}">{{ $ranking }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Status</label>
@@ -554,6 +570,10 @@
             if (editOfficialTimeIn) editOfficialTimeIn.value = officialTimeIn;
             if (editOfficialTimeOut) editOfficialTimeOut.value = officialTimeOut;
             if (editResumeLastUpdated) editResumeLastUpdated.value = resumeLastUpdated;
+
+            if (editPosition) {
+                editPosition.dispatchEvent(new Event('change', { bubbles: true }));
+            }
         }
 
         function closeAllModals() {

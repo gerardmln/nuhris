@@ -17,7 +17,7 @@ class EmployeePortalSeeder extends Seeder
      */
     public function run(): void
     {
-        $departmentId = Department::query()->where('name', 'College of Computing')->value('id')
+        $departmentId = Department::query()->where('name', 'SACE - School of Architecture, Computing and Engineering')->value('id')
             ?? Department::query()->value('id');
 
         $employee = Employee::updateOrCreate([
@@ -29,9 +29,9 @@ class EmployeePortalSeeder extends Seeder
             'phone' => '09170000001',
             'address' => 'NU Lipa Campus',
             'department_id' => $departmentId,
-            'position' => 'Instructor I',
+            'position' => 'Instructor',
             'employment_type' => 'Faculty',
-            'ranking' => 'Instructor I',
+            'ranking' => 'Instructor 1',
             'status' => 'active',
             'hire_date' => now()->subYears(2)->toDateString(),
             'official_time_in' => '08:30:00',

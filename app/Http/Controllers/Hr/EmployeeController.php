@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\Employee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class EmployeeController extends Controller
@@ -39,7 +40,13 @@ class EmployeeController extends Controller
 
         return view('hr.employees', [
             'employees' => $employees,
-            'departments' => Department::query()->orderBy('name')->get(),
+            'departments' => Department::query()->schools()->orderBy('name')->get(),
+            'employmentTypes' => config('hris.employment_types', []),
+            'employeePositions' => array_values(array_unique(array_merge(
+                config('hris.faculty_positions', []),
+                config('hris.admin_support_offices', [])
+            ))),
+            'facultyRankings' => config('hris.faculty_rankings', []),
             'filters' => [
                 'search' => $search,
                 'department_id' => $departmentId,
@@ -51,13 +58,22 @@ class EmployeeController extends Controller
     public function create(): View
     {
         return view('hr.employees.create', [
-            'departments' => Department::query()->orderBy('name')->get(),
+            'departments' => Department::query()->schools()->orderBy('name')->get(),
+            'employmentTypes' => config('hris.employment_types', []),
+            'employeePositions' => array_values(array_unique(array_merge(
+                config('hris.faculty_positions', []),
+                config('hris.admin_support_offices', [])
+            ))),
+            'facultyRankings' => config('hris.faculty_rankings', []),
         ]);
     }
 
     public function store(StoreEmployeeRequest $request): RedirectResponse
     {
-        Employee::create($request->validated());
+        $payload = $request->validated();
+        $payload = $this->applyDefaultDepartmentForNonTeachingRoles($payload);
+
+        Employee::create($payload);
 
         return redirect()
             ->route('employees.index')
@@ -77,13 +93,22 @@ class EmployeeController extends Controller
     {
         return view('hr.employees.edit', [
             'employee' => $employee,
-            'departments' => Department::query()->orderBy('name')->get(),
+            'departments' => Department::query()->schools()->orderBy('name')->get(),
+            'employmentTypes' => config('hris.employment_types', []),
+            'employeePositions' => array_values(array_unique(array_merge(
+                config('hris.faculty_positions', []),
+                config('hris.admin_support_offices', [])
+            ))),
+            'facultyRankings' => config('hris.faculty_rankings', []),
         ]);
     }
 
     public function update(UpdateEmployeeRequest $request, Employee $employee): RedirectResponse
     {
-        $employee->update($request->validated());
+        $payload = $request->validated();
+        $payload = $this->applyDefaultDepartmentForNonTeachingRoles($payload);
+
+        $employee->update($payload);
 
         return redirect()
             ->route('employees.index')
@@ -97,5 +122,23 @@ class EmployeeController extends Controller
         return redirect()
             ->route('employees.index')
             ->with('success', 'Employee deleted successfully.');
+    }
+
+    private function applyDefaultDepartmentForNonTeachingRoles(array $payload): array
+    {
+        $position = Str::lower((string) ($payload['position'] ?? ''));
+        $requiresDepartment = Str::contains($position, ['professor', 'dean', 'program chair']);
+
+        if ($requiresDepartment) {
+            return $payload;
+        }
+
+        $aspDepartmentId = Department::query()->where('name', 'ASP')->value('id');
+
+        if (filled($aspDepartmentId)) {
+            $payload['department_id'] = $aspDepartmentId;
+        }
+
+        return $payload;
     }
 }

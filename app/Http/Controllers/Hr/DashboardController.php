@@ -39,7 +39,14 @@ class DashboardController extends Controller
         return view('hr.dashboard', [
             'stats' => $stats,
             'announcements' => $announcements,
-            'departments' => Department::query()->orderBy('name')->get(),
+            'departments' => Department::query()->schools()->orderBy('name')->get(),
+            'employmentTypes' => config('hris.employment_types', []),
+            'employeePositions' => array_values(array_unique(array_merge(
+                config('hris.faculty_positions', []),
+                config('hris.admin_support_offices', [])
+            ))),
+            'facultyRankings' => config('hris.faculty_rankings', []),
+            'officeAudiences' => config('hris.admin_support_offices', []),
         ]);
     }
 }

@@ -184,7 +184,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Target Audience</label>
+                            <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Target Role</label>
                             <select name="target_user_type" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
                                 <option value="">Everyone</option>
                                 <option value="1">Admin</option>
@@ -192,6 +192,16 @@
                                 <option value="3">Employee</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-lg font-semibold text-[#1f2b8b]">Target Office (Admin Support Personnel)</label>
+                        <select name="target_office" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-lg focus:border-blue-400 focus:outline-none">
+                            <option value="">All Offices</option>
+                            @foreach ($officeAudiences as $office)
+                                <option value="{{ $office }}">{{ $office }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">

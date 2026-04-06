@@ -12,7 +12,7 @@
         <p class="mb-5 text-sm text-slate-500">Add a new HR employee record</p>
 
         <div class="rounded-xl border border-slate-300 bg-white p-5 shadow-sm">
-            <form method="POST" action="{{ route('employees.store') }}">
+            <form method="POST" action="{{ route('employees.store') }}" data-employee-form>
                 @csrf
                 @include('hr.employees._form')
             </form>

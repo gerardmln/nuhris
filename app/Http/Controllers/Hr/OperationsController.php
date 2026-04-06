@@ -52,7 +52,7 @@ class OperationsController extends Controller
 
         return view('hr.credentials', [
             'credentialRows' => $credentialRows,
-            'departments' => Department::query()->orderBy('name')->get(),
+            'departments' => Department::query()->schools()->orderBy('name')->get(),
             'stats' => [
                 'total' => $credentialRows->count(),
                 'pending' => $credentialRows->where('status', 'Pending')->count(),
@@ -146,7 +146,7 @@ class OperationsController extends Controller
 
         return view('hr.leavemanagement', [
             'leaveCards' => $leaveCards,
-            'departments' => Department::query()->orderBy('name')->get(),
+            'departments' => Department::query()->schools()->orderBy('name')->get(),
             'stats' => [
                 'total_employees' => $leaveCards->count(),
                 'vacation_used' => $leaveCards->sum('used'),

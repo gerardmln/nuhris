@@ -125,7 +125,7 @@ class PortalController extends Controller
                 'Academic Degree',
                 'Ranking File',
             ],
-            'departments' => Department::query()->orderBy('name')->get(),
+            'departments' => Department::query()->schools()->orderBy('name')->get(),
         ]);
     }
 
@@ -231,7 +231,7 @@ class PortalController extends Controller
 
         return view('employee.account', [
             'employee' => $employee,
-            'departments' => Department::query()->orderBy('name')->get(),
+            'departments' => Department::query()->schools()->orderBy('name')->get(),
             'employeeTypes' => ['Faculty', 'Security', 'ASP'],
         ]);
     }

@@ -206,16 +206,16 @@
                 <button type="button" data-close-modal class="text-4xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
             </div>
 
-            <form method="POST" action="{{ route('employees.store') }}" class="px-8 pb-8">
+            <form method="POST" action="{{ route('employees.store') }}" data-employee-form class="px-8 pb-8">
                 @csrf
                 <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
                     <p class="text-xs text-blue-800">Fields marked with * are required.</p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">Employee ID *</label>
-                        <input name="employee_id" type="text" placeholder="EMP-0001" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
+                    <div class="rounded-md border border-dashed border-slate-300 bg-slate-50 px-3 py-3 sm:col-span-2">
+                        <p class="text-sm font-semibold text-slate-700">Employee ID</p>
+                        <p class="text-sm text-slate-500">Automatically generated on save using the format <span class="font-medium text-slate-700">YYYY-001</span>.</p>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">First Name *</label>
@@ -234,17 +234,40 @@
                         <input name="phone" type="text" placeholder="09xxxxxxxxx" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
                     </div>
                     <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Employee Type *</label>
+                        <select name="employment_type" data-employee-control="employment_type" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
+                            <option value="">Select Type</option>
+                            @foreach ($employmentTypes as $type)
+                                <option value="{{ $type }}">{{ $type }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Position *</label>
+                        <select name="position" data-employee-control="position" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
+                            <option value="">Select Position / Office</option>
+                            @foreach ($employeePositions as $position)
+                                <option value="{{ $position }}">{{ $position }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div data-employee-field="department">
                         <label class="mb-1 block text-sm font-semibold text-slate-700">Department *</label>
-                        <select name="department_id" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
+                        <select name="department_id" data-employee-control="department" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
                             <option value="">Select Department</option>
                             @foreach ($departments as $department)
                                 <option value="{{ $department->id }}">{{ $department->name }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">Position *</label>
-                        <input name="position" type="text" placeholder="Faculty" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none" required>
+                    <div data-employee-field="ranking">
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Faculty Ranking</label>
+                        <select name="ranking" data-employee-control="ranking" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                            <option value="">N/A</option>
+                            @foreach ($facultyRankings as $ranking)
+                                <option value="{{ $ranking }}">{{ $ranking }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">Date Hired</label>
@@ -340,7 +363,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Target Audience</label>
+                            <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Target Role</label>
                             <select name="target_user_type" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
                                 <option value="">Everyone</option>
                                 <option value="1">Admin</option>
@@ -348,6 +371,16 @@
                                 <option value="3">Employee</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-[#1f2b8b]">Target Office (Admin Support Personnel)</label>
+                        <select name="target_office" class="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none">
+                            <option value="">All Offices</option>
+                            @foreach ($officeAudiences as $office)
+                                <option value="{{ $office }}">{{ $office }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div>

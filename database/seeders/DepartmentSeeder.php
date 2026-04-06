@@ -13,14 +13,11 @@ class DepartmentSeeder extends Seeder
     public function run(): void
     {
         $departments = [
-            'College of Engineering',
-            'College of Business',
-            'College of Education',
-            'College of Arts & Sciences',
-            'College of Computing',
-            'College of Allied Health',
-            'Administration',
-            'Human Resources',
+            'ASP',
+            'SABM - School of Accountancy, Business and Management',
+            'SAHS - School of Allied Health and Sciences',
+            'SACE - School of Architecture, Computing and Engineering',
+            'SHS - Senior High School',
         ];
 
         foreach ($departments as $name) {
