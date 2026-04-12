@@ -7,6 +7,7 @@ use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Department;
 use App\Models\Employee;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -73,7 +74,23 @@ class EmployeeController extends Controller
         $payload = $request->validated();
         $payload = $this->applyDefaultDepartmentForNonTeachingRoles($payload);
 
-        Employee::create($payload);
+        $attempt = 0;
+
+        while (true) {
+            try {
+                Employee::create($payload);
+                break;
+            } catch (UniqueConstraintViolationException $exception) {
+                $attempt++;
+
+                if ($attempt >= 3 || ! str_contains($exception->getMessage(), 'employees_employee_id_unique')) {
+                    throw $exception;
+                }
+
+                // Force a fresh ID when two requests try to create a row at the same time.
+                $payload['employee_id'] = Employee::generateEmployeeId();
+            }
+        }
 
         return redirect()
             ->route('employees.index')

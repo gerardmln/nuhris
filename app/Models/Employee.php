@@ -26,20 +26,21 @@ class Employee extends Model
     public static function generateEmployeeId(?int $year = null): string
     {
         $year ??= now()->year;
-        $prefix = $year.'-';
+        $yearToken = (string) $year;
 
         $latestSequence = static::withTrashed()
-            ->where('employee_id', 'like', $prefix.'%')
             ->pluck('employee_id')
-            ->map(function (string $employeeId) use ($prefix): ?int {
-                $sequence = substr($employeeId, strlen($prefix));
+            ->map(function (string $employeeId) use ($yearToken): ?int {
+                if (! preg_match('/(?:^|\\D)'.preg_quote($yearToken, '/').'-?(\\d+)(?:\\D|$)/', $employeeId, $matches)) {
+                    return null;
+                }
 
-                return ctype_digit($sequence) ? (int) $sequence : null;
+                return (int) $matches[1];
             })
             ->filter()
             ->max() ?? 0;
 
-        return sprintf('%s%03d', $prefix, $latestSequence + 1);
+        return sprintf('%s-%03d', $year, $latestSequence + 1);
     }
 
     protected $fillable = [

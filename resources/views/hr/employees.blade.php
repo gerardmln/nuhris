@@ -69,6 +69,17 @@
                     </div>
                 @endif
 
+                @if ($errors->any())
+                    <div class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+                        <p class="font-semibold">Unable to save employee. Please check the fields below.</p>
+                        <ul class="mt-2 list-disc ps-5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <h2 class="text-3xl font-bold text-[#1f2b5d]">Employees</h2>
@@ -477,6 +488,7 @@
     </div>
 
     <script>
+        const hasValidationErrors = {{ $errors->any() ? 'true' : 'false' }};
         const openers = document.querySelectorAll('[data-open-modal]');
         const closers = document.querySelectorAll('[data-close-modal]');
         const modals = document.querySelectorAll('.modal-overlay');
@@ -619,6 +631,16 @@
                 closeAllModals();
             }
         });
+
+        if (hasValidationErrors) {
+            const addModal = document.getElementById('employee-add-modal');
+
+            if (addModal) {
+                addModal.classList.remove('hidden');
+                addModal.classList.add('flex');
+                document.body.classList.add('overflow-hidden');
+            }
+        }
     </script>
 </body>
 </html>
